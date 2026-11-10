@@ -187,6 +187,12 @@ DAILY_GOLD_RATES = {
 # Standard jewellery GST rate
 JEWELLERY_GST_PERCENT = Decimal('3.00')
 
+# Stripe Payment Gateway Configuration (Loaded securely from .env)
+STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY', '')
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', '')
+STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET', '')
+STRIPE_CURRENCY = os.getenv('STRIPE_CURRENCY', 'inr')
+
 # REST Framework settings
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',

@@ -22,6 +22,7 @@ class Order(models.Model):
         ('UPI', 'UPI / QR Code (Instant)'),
         ('ONLINE_CARD', 'Credit / Debit Card / NetBanking'),
         ('BANK_TRANSFER', 'Direct Bank Transfer / NEFT'),
+        ('STRIPE', 'Stripe Online Payment (Cards & Global)'),
     ]
 
     PAYMENT_STATUS_CHOICES = [
@@ -130,8 +131,8 @@ class Payment(models.Model):
     ]
 
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='payments')
-    transaction_id = models.CharField(max_length=100, unique=True)
-    payment_method = models.CharField(max_length=30)
+    transaction_id = models.CharField(max_length=120, unique=True)
+    payment_method = models.CharField(max_length=100)
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='SUCCESS')
     payment_details = models.TextField(blank=True, help_text="Transaction reference details, gateway payloads")

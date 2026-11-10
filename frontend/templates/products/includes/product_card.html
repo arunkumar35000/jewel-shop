@@ -45,9 +45,9 @@
     <div class="product-weight-meta">
       <span>Wt: {{ product.gross_weight }}g</span>
       {% if product.stone_weight > 0 %}
-        <span>• Stones: {{ product.stone_weight }}g</span>
+        <span class="d-none d-sm-inline">• St: {{ product.stone_weight }}g</span>
       {% endif %}
-      <span class="text-gold float-end"><i class="bi bi-patch-check-fill"></i> BIS 916</span>
+      <span class="text-gold float-end d-none d-sm-inline"><i class="bi bi-patch-check-fill"></i> BIS 916</span>
     </div>
 
     <div class="product-price-row mb-3">
@@ -67,7 +67,7 @@
     <div class="row g-2 align-items-center">
       <div class="col-8">
         <button type="button" class="btn btn-card-add w-100" onclick="addToCart({{ product.id }}, 1, this)" title="Add to Bag">
-          <i class="bi bi-bag-plus"></i> <span>Add to Bag</span>
+          <i class="bi bi-bag-plus"></i> <span>Add</span><span class="d-none d-sm-inline"> to Bag</span>
         </button>
       </div>
       <div class="col-4">

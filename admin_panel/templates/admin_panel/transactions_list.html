@@ -1,0 +1,192 @@
+{% extends 'admin_panel/base_admin.html' %}
+{% load static %}
+
+{% block title %}Payment Transactions & Stripe Ledger | AURA Admin{% endblock %}
+{% block admin_title %}Transactions & Stripe Ledger{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 px-lg-5">
+  
+  <!-- Header -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+    <div>
+      <span class="badge bg-gold text-dark text-uppercase fw-bold"><i class="bi bi-shield-check me-1"></i> Gateway Ledger</span>
+      <h2 class="serif-font fw-bold mt-1 mb-0">Payment Transactions</h2>
+      <small class="text-muted">Real-time gateway settlements, Stripe charges, and transaction audits</small>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'admin_orders_list' %}" class="btn btn-outline-dark btn-sm">
+        <i class="bi bi-box-seam me-1"></i> Orders
+      </a>
+      <a href="{% url 'admin_dashboard' %}" class="btn btn-gold btn-sm">
+        <i class="bi bi-speedometer2 me-1"></i> Dashboard
+      </a>
+    </div>
+  </div>
+
+  <!-- KPI Metrics Strip -->
+  <div class="row g-3 mb-4">
+    <div class="col-sm-4">
+      <div class="card p-3 border-gold-subtle shadow-sm bg-white rounded-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-muted small text-uppercase fw-bold">Total Transactions</div>
+            <div class="fs-4 fw-bold text-dark">{{ total_count }}</div>
+          </div>
+          <div class="kpi-icon-bubble bg-light text-primary"><i class="bi bi-credit-card-2-front"></i></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-4">
+      <div class="card p-3 border-gold-subtle shadow-sm bg-white rounded-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-muted small text-uppercase fw-bold">Settled / Successful</div>
+            <div class="fs-4 fw-bold text-success">{{ successful_count }}</div>
+          </div>
+          <div class="kpi-icon-bubble bg-light text-success"><i class="bi bi-patch-check-fill"></i></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-4">
+      <div class="card p-3 border-gold-subtle shadow-sm bg-white rounded-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-muted small text-uppercase fw-bold">Stripe Gateways</div>
+            <div class="fs-4 fw-bold" style="color: #635BFF;"><i class="bi bi-stripe"></i> Live / Test</div>
+          </div>
+          <div class="kpi-icon-bubble bg-light" style="color: #635BFF;"><i class="bi bi-lock-fill"></i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search & Filter Controls -->
+  <div class="card p-3 mb-4 border-gold-subtle shadow-sm bg-white">
+    <form method="GET" class="row g-2 align-items-center">
+      <div class="col-md-5">
+        <div class="input-group input-group-sm">
+          <input type="text" name="q" class="form-control" placeholder="Search transaction ID, order #, customer, email..." value="{{ q }}">
+          <button class="btn btn-gold" type="submit"><i class="bi bi-search"></i></button>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+          <option value="">All Statuses</option>
+          <option value="SUCCESS" {% if status_filter == 'SUCCESS' %}selected{% endif %}>Success</option>
+          <option value="PENDING" {% if status_filter == 'PENDING' %}selected{% endif %}>Pending</option>
+          <option value="FAILED" {% if status_filter == 'FAILED' %}selected{% endif %}>Failed</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <select name="method" class="form-select form-select-sm" onchange="this.form.submit()">
+          <option value="">All Payment Gateways</option>
+          <option value="Stripe" {% if method_filter == 'Stripe' %}selected{% endif %}>Stripe Cards & Global</option>
+          <option value="UPI" {% if method_filter == 'UPI' %}selected{% endif %}>UPI / Instant QR</option>
+          <option value="COD" {% if method_filter == 'COD' %}selected{% endif %}>Cash on Delivery</option>
+        </select>
+      </div>
+      <div class="col-md-1 text-end">
+        <a href="{% url 'admin_transactions_list' %}" class="btn btn-outline-secondary btn-sm w-100">Reset</a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Transactions Table -->
+  <div class="card border-gold-subtle shadow-sm bg-white rounded-3 overflow-hidden">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0 small">
+        <thead class="table-dark text-uppercase">
+          <tr>
+            <th>Transaction ID</th>
+            <th>Order #</th>
+            <th>Customer & Email</th>
+            <th>Gateway / Method</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Timestamp</th>
+            <th class="text-end">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for t in transactions %}
+            <tr>
+              <td>
+                <div class="fw-bold font-monospace text-dark d-flex align-items-center gap-1">
+                  {% if 'Stripe' in t.payment_method %}
+                    <span class="badge text-white px-2 py-1" style="background:#635BFF; font-size:0.68rem;"><i class="bi bi-stripe"></i></span>
+                  {% elif 'UPI' in t.payment_method %}
+                    <span class="badge bg-warning text-dark px-2 py-1" style="font-size:0.68rem;"><i class="bi bi-qr-code"></i></span>
+                  {% else %}
+                    <span class="badge bg-secondary px-2 py-1" style="font-size:0.68rem;"><i class="bi bi-cash-stack"></i></span>
+                  {% endif %}
+                  {{ t.transaction_id }}
+                </div>
+                <div class="text-muted" style="font-size: 0.7rem;">{{ t.payment_details|truncatechars:45 }}</div>
+              </td>
+              <td>
+                <a href="{% url 'admin_order_detail' t.order.order_number %}" class="fw-bold text-decoration-none font-monospace text-gold">
+                  {{ t.order.order_number }}
+                </a>
+              </td>
+              <td>
+                <div class="fw-bold text-dark">{{ t.order.customer_name }}</div>
+                <small class="text-muted">{{ t.order.customer_email }}</small>
+              </td>
+              <td>
+                <span class="badge bg-light text-dark border">{{ t.payment_method }}</span>
+              </td>
+              <td class="fw-bold fs-6">₹{{ t.amount }}</td>
+              <td>
+                {% if t.status == 'SUCCESS' %}
+                  <span class="badge bg-success"><i class="bi bi-check-circle-fill me-1"></i> Success</span>
+                {% elif t.status == 'PENDING' %}
+                  <span class="badge bg-warning text-dark"><i class="bi bi-clock-history me-1"></i> Pending</span>
+                {% else %}
+                  <span class="badge bg-danger"><i class="bi bi-x-circle-fill me-1"></i> Failed</span>
+                {% endif %}
+              </td>
+              <td class="text-muted">{{ t.created_at|date:"d M Y, h:i A" }}</td>
+              <td class="text-end">
+                <a href="{% url 'admin_order_detail' t.order.order_number %}" class="btn btn-outline-dark btn-sm py-1 px-2" title="View Full Order & Receipt">
+                  <i class="bi bi-eye me-1"></i> View Order
+                </a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="8" class="text-center py-5 text-muted">
+                <i class="bi bi-credit-card-2-front fs-2 text-gold d-block mb-2"></i>
+                No payment transactions recorded yet matching this criteria.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if transactions.has_other_pages %}
+      <div class="p-3 border-top d-flex justify-content-between align-items-center">
+        <span class="text-muted small">Showing {{ transactions.start_index }} to {{ transactions.end_index }} of {{ total_count }} transactions</span>
+        <ul class="pagination pagination-sm mb-0">
+          {% if transactions.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ transactions.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if method_filter %}&method={{ method_filter }}{% endif %}">&laquo;</a></li>
+          {% endif %}
+          {% for p in transactions.paginator.page_range %}
+            <li class="page-item {% if transactions.number == p %}active{% endif %}">
+              <a class="page-link" href="?page={{ p }}{% if q %}&q={{ q }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if method_filter %}&method={{ method_filter }}{% endif %}">{{ p }}</a>
+            </li>
+          {% endfor %}
+          {% if transactions.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ transactions.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if method_filter %}&method={{ method_filter }}{% endif %}">&raquo;</a></li>
+          {% endif %}
+        </ul>
+      </div>
+    {% endif %}
+
+  </div>
+
+</div>
+{% endblock %}
+

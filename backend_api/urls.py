@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . import payment
 
 urlpatterns = [
     # -------------------------------------------------------------
@@ -13,6 +14,15 @@ urlpatterns = [
     path('cart/add/', views.CartItemAddAPI.as_view(), name='api_cart_add'),
     path('orders/track/<str:order_number>/', views.OrderTrackAPI.as_view(), name='api_order_track'),
     path('custom-orders/', views.CustomOrderListCreateAPI.as_view(), name='api_custom_orders'),
+
+    # -------------------------------------------------------------
+    # STRIPE PAYMENT & TRANSACTIONS REST APIS
+    # -------------------------------------------------------------
+    path('payment/stripe/create-checkout-session/', payment.CreateStripePaymentAPIView.as_view(), name='api_stripe_create_session'),
+    path('payment/stripe/success/', payment.StripePaymentSuccessView.as_view(), name='api_stripe_success'),
+    path('payment/stripe/cancel/', payment.StripePaymentCancelView.as_view(), name='api_stripe_cancel'),
+    path('payment/stripe/webhook/', payment.StripeWebhookAPIView.as_view(), name='api_stripe_webhook'),
+    path('payment/transactions/', payment.TransactionListAPIView.as_view(), name='api_transactions_list'),
 
     # -------------------------------------------------------------
     # ADMIN PANEL COMMUNICATION REST APIS

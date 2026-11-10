@@ -21,8 +21,19 @@
             <strong>Phone:</strong> {{ order.customer_phone }}
           </div>
           <div class="col-md-6">
-            <strong>Payment Method:</strong> {{ order.get_payment_method_display }}<br>
-            <strong>Payment Status:</strong> <span class="badge bg-success">{{ order.get_payment_status_display }}</span><br>
+            <strong>Payment Method:</strong> 
+            {{ order.get_payment_method_display }}
+            {% if 'Stripe' in order.get_payment_method_display or order.payment_method == 'STRIPE' %}
+              <span class="badge text-white ms-1" style="background:#635BFF;"><i class="bi bi-stripe"></i> Stripe Verified</span>
+            {% endif %}
+            <br>
+            <strong>Payment Status:</strong> 
+            <span class="badge {% if order.payment_status == 'PAID' %}bg-success{% elif order.payment_status == 'FAILED' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+              {{ order.get_payment_status_display }}
+            </span><br>
+            {% for p in order.payments.all %}
+              <strong>Transaction Ref:</strong> <span class="font-monospace text-dark fw-bold">{{ p.transaction_id }}</span><br>
+            {% endfor %}
             <strong>Estimated Delivery:</strong> {{ order.estimated_delivery|date:"l, d M Y" }}
           </div>
           <div class="col-12 border-top pt-2 mt-2">

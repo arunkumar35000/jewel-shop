@@ -46,74 +46,85 @@
     
     <!-- Filter Sidebar Column -->
     <div class="col-lg-3">
-      <div class="card p-4 border-gold-subtle shadow-sm bg-white rounded-3">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h5 class="serif-font fw-bold mb-0">Refine By</h5>
-          <a href="{% url 'product_list' %}" class="small text-gold text-decoration-none">Clear All</a>
-        </div>
-
-        <form method="GET" action="{% url 'product_list' %}">
-          {% if q %}<input type="hidden" name="q" value="{{ q }}">{% endif %}
-          <input type="hidden" name="sort" value="{{ sort }}">
-
-          <!-- Category Filter -->
-          <div class="mb-4">
-            <h6 class="small fw-bold text-uppercase border-bottom pb-2 mb-2">Category</h6>
-            <div class="d-flex flex-column gap-1 small">
-              {% for cat in all_categories %}
-                <a href="{{ cat.get_absolute_url }}" class="text-decoration-none {% if current_category.slug == cat.slug %}text-gold fw-bold{% else %}text-muted{% endif %} py-1">
-                  {{ cat.name }} ({{ cat.products.count }})
-                </a>
-              {% endfor %}
-            </div>
-          </div>
-
-          <!-- Metal Type Filter -->
-          <div class="mb-4">
-            <h6 class="small fw-bold text-uppercase border-bottom pb-2 mb-2">Metal Type</h6>
-            <select name="metal" class="form-select form-select-sm mb-2" onchange="this.form.submit()">
-              <option value="">All Metals</option>
-              <option value="GOLD" {% if selected_metal == 'GOLD' %}selected{% endif %}>Yellow Gold</option>
-              <option value="DIAMOND" {% if selected_metal == 'DIAMOND' %}selected{% endif %}>Natural Diamond</option>
-              <option value="ROSE_GOLD" {% if selected_metal == 'ROSE_GOLD' %}selected{% endif %}>Rose Gold</option>
-              <option value="PLATINUM" {% if selected_metal == 'PLATINUM' %}selected{% endif %}>950 Platinum</option>
-              <option value="SILVER" {% if selected_metal == 'SILVER' %}selected{% endif %}>Sterling Silver</option>
-            </select>
-          </div>
-
-          <!-- Gold Purity Filter -->
-          <div class="mb-4">
-            <h6 class="small fw-bold text-uppercase border-bottom pb-2 mb-2">Gold Purity</h6>
-            <select name="purity" class="form-select form-select-sm mb-2" onchange="this.form.submit()">
-              <option value="">All Purities</option>
-              <option value="24K" {% if selected_purity == '24K' %}selected{% endif %}>24K (999 Pure)</option>
-              <option value="22K" {% if selected_purity == '22K' %}selected{% endif %}>22K (916 Hallmark)</option>
-              <option value="18K" {% if selected_purity == '18K' %}selected{% endif %}>18K (750 Hallmark)</option>
-              <option value="14K" {% if selected_purity == '14K' %}selected{% endif %}>14K (585 Hallmark)</option>
-            </select>
-          </div>
-
-          <!-- 360° Rotation Filter Toggle -->
-          <div class="mb-4">
-            <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" name="has_360" value="1" id="filter360" {% if request.GET.has_360 == '1' %}checked{% endif %} onchange="this.form.submit()">
-              <label class="form-check-label small fw-bold" for="filter360">
-                <i class="bi bi-arrow-repeat text-gold me-1"></i> 360° Rotate Only
-              </label>
-            </div>
-          </div>
-
-          <div class="d-grid">
-            <button type="submit" class="btn btn-dark-luxury btn-sm py-2">Apply Filters</button>
-          </div>
-        </form>
+      <!-- Mobile Filter Collapsible Trigger -->
+      <div class="d-lg-none mb-3">
+        <button class="btn btn-white w-100 d-flex justify-content-between align-items-center py-2 px-3 border border-gold-subtle rounded-3 shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#filterSidebarCollapse" aria-expanded="false" aria-controls="filterSidebarCollapse">
+          <span class="fw-bold"><i class="bi bi-funnel-fill text-gold me-2"></i>Filter & Refine</span>
+          <span class="badge bg-gold text-dark"><i class="bi bi-sliders me-1"></i>Filters</span>
+        </button>
       </div>
 
-      <!-- Hallmark Verification Promo Widget -->
-      <div class="card p-3 mt-4 border-gold-subtle shadow-sm bg-dark-obsidian text-light text-center">
-        <i class="bi bi-patch-check-fill fs-2 text-gold mb-2"></i>
-        <h6 class="text-gold serif-font mb-1">BIS Hallmarked Guarantee</h6>
-        <p class="small text-muted mb-0">Every creation is laser stamped with BIS hallmark and HUID certificate.</p>
+      <!-- Collapsible Container (Always visible on lg+, collapsed on mobile/tablet) -->
+      <div class="collapse d-lg-block" id="filterSidebarCollapse">
+        <div class="card p-4 border-gold-subtle shadow-sm bg-white rounded-3">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="serif-font fw-bold mb-0">Refine By</h5>
+            <a href="{% url 'product_list' %}" class="small text-gold text-decoration-none">Clear All</a>
+          </div>
+
+          <form method="GET" action="{% url 'product_list' %}">
+            {% if q %}<input type="hidden" name="q" value="{{ q }}">{% endif %}
+            <input type="hidden" name="sort" value="{{ sort }}">
+
+            <!-- Category Filter -->
+            <div class="mb-4">
+              <h6 class="small fw-bold text-uppercase border-bottom pb-2 mb-2">Category</h6>
+              <div class="d-flex flex-column gap-1 small">
+                {% for cat in all_categories %}
+                  <a href="{{ cat.get_absolute_url }}" class="text-decoration-none {% if current_category.slug == cat.slug %}text-gold fw-bold{% else %}text-muted{% endif %} py-1">
+                    {{ cat.name }} ({{ cat.products.count }})
+                  </a>
+                {% endfor %}
+              </div>
+            </div>
+
+            <!-- Metal Type Filter -->
+            <div class="mb-4">
+              <h6 class="small fw-bold text-uppercase border-bottom pb-2 mb-2">Metal Type</h6>
+              <select name="metal" class="form-select form-select-sm mb-2" onchange="this.form.submit()">
+                <option value="">All Metals</option>
+                <option value="GOLD" {% if selected_metal == 'GOLD' %}selected{% endif %}>Yellow Gold</option>
+                <option value="DIAMOND" {% if selected_metal == 'DIAMOND' %}selected{% endif %}>Natural Diamond</option>
+                <option value="ROSE_GOLD" {% if selected_metal == 'ROSE_GOLD' %}selected{% endif %}>Rose Gold</option>
+                <option value="PLATINUM" {% if selected_metal == 'PLATINUM' %}selected{% endif %}>950 Platinum</option>
+                <option value="SILVER" {% if selected_metal == 'SILVER' %}selected{% endif %}>Sterling Silver</option>
+              </select>
+            </div>
+
+            <!-- Gold Purity Filter -->
+            <div class="mb-4">
+              <h6 class="small fw-bold text-uppercase border-bottom pb-2 mb-2">Gold Purity</h6>
+              <select name="purity" class="form-select form-select-sm mb-2" onchange="this.form.submit()">
+                <option value="">All Purities</option>
+                <option value="24K" {% if selected_purity == '24K' %}selected{% endif %}>24K (999 Pure)</option>
+                <option value="22K" {% if selected_purity == '22K' %}selected{% endif %}>22K (916 Hallmark)</option>
+                <option value="18K" {% if selected_purity == '18K' %}selected{% endif %}>18K (750 Hallmark)</option>
+                <option value="14K" {% if selected_purity == '14K' %}selected{% endif %}>14K (585 Hallmark)</option>
+              </select>
+            </div>
+
+            <!-- 360° Rotation Filter Toggle -->
+            <div class="mb-4">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" name="has_360" value="1" id="filter360" {% if request.GET.has_360 == '1' %}checked{% endif %} onchange="this.form.submit()">
+                <label class="form-check-label small fw-bold" for="filter360">
+                  <i class="bi bi-arrow-repeat text-gold me-1"></i> 360° Rotate Only
+                </label>
+              </div>
+            </div>
+
+            <div class="d-grid">
+              <button type="submit" class="btn btn-dark-luxury btn-sm py-2">Apply Filters</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Hallmark Verification Promo Widget -->
+        <div class="card p-3 mt-4 border-gold-subtle shadow-sm bg-dark-obsidian text-light text-center d-none d-lg-block">
+          <i class="bi bi-patch-check-fill fs-2 text-gold mb-2"></i>
+          <h6 class="text-gold serif-font mb-1">BIS Hallmarked Guarantee</h6>
+          <p class="small text-muted mb-0">Every creation is laser stamped with BIS hallmark and HUID certificate.</p>
+        </div>
       </div>
     </div>
 

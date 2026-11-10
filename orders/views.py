@@ -69,8 +69,13 @@ def checkout_view(request):
             b_street = request.POST.get('billing_street', shipping_addr_text)
             billing_addr_text = b_street
 
-        payment_method = request.POST.get('payment_method', 'UPI')
+        payment_method = request.POST.get('payment_method', 'STRIPE').strip().upper()
         order_notes = request.POST.get('order_notes', '')
+
+        # Determine if Stripe payment was selected (default & primary)
+        is_stripe = payment_method in ['STRIPE', 'ONLINE_CARD', 'CARD']
+        initial_payment_status = 'PENDING'
+        initial_order_status = 'PENDING'
 
         # Create Order
         order = Order.objects.create(
@@ -85,8 +90,8 @@ def checkout_view(request):
             tax_amount=cart.gst_amount,
             grand_total=cart.grand_total,
             payment_method=payment_method,
-            payment_status='PAID' if payment_method in ['UPI', 'ONLINE_CARD'] else 'PENDING',
-            order_status='CONFIRMED' if payment_method in ['UPI', 'ONLINE_CARD'] else 'PENDING',
+            payment_status=initial_payment_status,
+            order_status=initial_order_status,
             order_notes=order_notes,
             estimated_delivery=timezone.now().date() + timezone.timedelta(days=4)
         )
@@ -113,7 +118,13 @@ def checkout_view(request):
                 item.product.stock -= item.quantity
                 item.product.save()
 
-        # Create Payment Record
+        # If Stripe payment method selected, forward customer to Stripe Checkout gateway
+        if is_stripe:
+            from backend_api.payment import create_stripe_checkout_session
+            session_data = create_stripe_checkout_session(order, request)
+            return redirect(session_data['checkout_url'])
+
+        # Create Payment Record for non-Stripe methods (UPI, COD, Bank Transfer)
         txn_id = f"TXN-{uuid.uuid4().hex[:10].upper()}"
         Payment.objects.create(
             order=order,

@@ -44,6 +44,66 @@ flowchart TD
 
 ---
 
+## 💳 Stripe Payment Gateway Architecture & Lifecycle Flow
+
+The application integrates an end-to-end commercial payment processing pipeline powered by **Stripe Checkout**, real-time transaction reconciliation, automated status synchronization, and an administrative audit ledger.
+
+### End-to-End Payment Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Customer as 🛍️ Customer
+    participant Web as 💻 Storefront (/orders/checkout/)
+    participant OrdersView as ⚙️ Orders Engine (orders/views.py)
+    participant StripeModule as ⚡ Payment Gateway (backend_api/payment.py)
+    participant StripeCloud as 🌐 Stripe Servers (checkout.stripe.com)
+    participant DB as 🗄️ Database (Orders & Payments)
+    actor Admin as 👑 Admin Suite (/admin-panel/)
+
+    Customer->>Web: Selects items & proceeds to Checkout
+    Note over Customer,Web: Stripe is pre-selected by default (Option #1)
+    Customer->>Web: Clicks "Pay ₹[Total] with Stripe"
+    Web->>OrdersView: POST /orders/checkout/ (payment_method='STRIPE')
+    OrdersView->>DB: Create Order (status='PENDING', payment_status='PENDING')
+    OrdersView->>StripeModule: create_stripe_checkout_session(order, request)
+    StripeModule->>StripeCloud: stripe.checkout.Session.create(...)
+    StripeCloud-->>StripeModule: Returns Session Object with session.url
+    StripeModule-->>OrdersView: Checkout Session URL (https://checkout.stripe.com/...)
+    OrdersView-->>Customer: HTTP 302 Redirect to Stripe Hosted Checkout
+
+    rect rgb(245, 240, 225)
+    Note over Customer,StripeCloud: Customer enters Card / NetBanking / UPI on Stripe
+    Customer->>StripeCloud: Submits Payment Details & Authenticates (3D Secure / OTP)
+    StripeCloud-->>Customer: Payment Authorized & Captured
+    end
+
+    alt Synchronous Customer Redirect Flow
+        StripeCloud-->>Customer: Redirect to success_url (/orders/payment/stripe/success/?session_id=...)
+        Customer->>StripeModule: GET /orders/payment/stripe/success/?session_id=...
+        StripeModule->>StripeCloud: stripe.checkout.Session.retrieve(session_id)
+        StripeCloud-->>StripeModule: Session confirmed (payment_status='paid')
+        StripeModule->>DB: record_payment_transaction(order, txn_id, 'STRIPE', amount, 'SUCCESS')
+        StripeModule->>DB: Update order (order_status='CONFIRMED', payment_status='PAID')
+        StripeModule-->>Customer: Redirect to /orders/confirmation/<order_number>/
+    else Asynchronous Webhook Backup Flow
+        StripeCloud->>StripeModule: POST /api/v1/payment/stripe/webhook/ (checkout.session.completed)
+        StripeModule->>DB: Verify signature & idempotently reconcile payment if not already marked PAID
+    end
+
+    Customer->>Web: Views Order Confirmation & Tax Invoice (HSN 7113)
+    Admin->>DB: Views Real-Time Live Payment Ledger at /admin-panel/transactions/
+    Admin->>DB: Inspects Revenue, Transaction IDs & Order Details at /admin-panel/dashboard/
+```
+
+### Key Payment Components & Capabilities
+1. **Dynamic Checkout UX**: Real-time JavaScript detects the chosen payment method and updates the CTA button to display `"Pay ₹[Total] with Stripe"`.
+2. **Direct Stripe Redirect Engine**: `orders/views.py` sets Stripe as default option #1, constructs order line items, initializes the checkout session via `backend_api/payment.py`, and executes a 302 redirect directly to `https://checkout.stripe.com/`.
+3. **Double Verification Mechanism**: Payment completion is verified both synchronously upon customer browser return (`/orders/payment/stripe/success/`) and asynchronously via the Stripe Webhook listener (`/api/v1/payment/stripe/webhook/`) with cryptographic signature checking.
+4. **Administrative Audit Ledger**: All successful and failed transactions are preserved in the `Payment` database table, complete with `transaction_id`, payment gateway brand, currency, and exact timestamp, visible under `/admin-panel/transactions/` and the Admin KPI Dashboard.
+
+---
+
 ## 📁 Project Directory Structure
 
 ```text
@@ -68,8 +128,9 @@ Jewellery_Shop/
 │
 ├── admin_panel/                  # [2] ADMIN PANEL: Management Suite & Dashboards
 │   ├── templates/
-│   │   └── admin_panel/          # Executive KPI dashboard, Chart.js analytics,
-│   │                             # order management, quotations, customer directory
+│   │   └── admin_panel/          # Dedicated base_admin.html layout with luxury sidebar,
+│   │                             # executive KPI dashboard, Chart.js analytics,
+│   │                             # order fulfillment, quotations, customer directory
 │   ├── apps.py                   # AdminPanelConfig
 │   ├── urls.py                   # Admin routing (/admin-panel/...)
 │   └── views.py                  # Admin portal views & analytics aggregation
@@ -111,6 +172,7 @@ Jewellery_Shop/
 | **Language** | Python | `3.7+` / `3.10+` | Core backend programming language |
 | **Web Framework** | Django | `3.2.25 LTS` | Full-stack MVC / MVT web framework |
 | **REST API** | Django REST Framework | `3.15.1` | REST API endpoints for Website & Admin |
+| **Payment Gateway** | Stripe Python SDK | `14.4.2` | Hosted Checkout Sessions, Cards, Webhooks & Transaction Audit |
 | **Image Engine** | Pillow | `9.5.0` | 360° frame generation & image manipulation |
 | **Database Driver** | PyMySQL | `1.1.1` | MySQL connector (with automatic SQLite fallback) |
 | **UI Framework** | Bootstrap | `5.3.3` | Responsive grid, components, and offcanvas drawers |
@@ -155,6 +217,18 @@ python manage.py runserver 127.0.0.1:8000
 
 > **⚡ Fast 1-Click Launch (Windows)**:
 > Simply double-click `run.bat` or execute `.\run.ps1` in PowerShell. The launcher will automatically find the project's virtual environment, set up the paths, and start the development server at `http://127.0.0.1:8000/`.
+
+### 3. Stripe Payment Gateway Configuration
+
+The project utilizes environment variables (`.env`) for Stripe API keys. The keys are automatically loaded by `settings.py` with fallback defaults for seamless local development:
+
+```env
+# Stripe Payment Gateway Credentials (.env)
+STRIPE_PUBLISHABLE_KEY=pk_test_your_publishable_key_here
+STRIPE_SECRET_KEY=sk_test_your_secret_key_here
+STRIPE_CURRENCY=inr
+STRIPE_WEBHOOK_SECRET=whsec_your_webhook_signing_secret_here
+```
 
 ---
 
@@ -209,6 +283,7 @@ The pre-seeded database comes equipped with full sample gold jewellery products,
 | `/admin-panel/dashboard/` | `admin_panel.views.dashboard` | Executive KPI dashboard with revenue & Chart.js sales graphs |
 | `/admin-panel/orders/` | `admin_panel.views.orders_list` | Master order fulfillment list with search & status filters |
 | `/admin-panel/orders/<num>/` | `admin_panel.views.order_detail`| Update order status, assign courier, enter tracking number |
+| `/admin-panel/transactions/` | `admin_panel.views.admin_transactions_list` | Payment transactions & Stripe gateway ledger |
 | `/admin-panel/custom-requests/`| `admin_panel.views.requests` | Manage custom jewellery design requests |
 | `/admin-panel/custom-requests/<id>/` | `admin_panel.views.detail` | Review customer sketches, photos, specifications |
 | `/admin-panel/custom-requests/<id>/quotation/` | `admin_panel.views.quotation` | Issue official price quotation & upload 3D CAD render |
@@ -238,7 +313,16 @@ The REST API enables headless integration, mobile application connectivity, and 
 | `GET` | `/api/v1/custom-orders/` | List authenticated user's custom design requests |
 | `POST`| `/api/v1/custom-orders/` | Submit new custom design request with reference data |
 
-#### B. Admin Panel Communication APIs
+#### B. Stripe Payment & Gateway APIs
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/api/v1/payment/stripe/create-checkout-session/` | Create Stripe Checkout Session for an order (`{"order_number": "..."}`) |
+| `GET/POST` | `/api/v1/payment/stripe/success/` | Stripe payment verification & success callback (records transaction & marks order PAID) |
+| `GET/POST` | `/api/v1/payment/stripe/cancel/` | Stripe payment cancellation callback (records failed attempt in ledger) |
+| `POST` | `/api/v1/payment/stripe/webhook/` | Stripe webhook event listener (`checkout.session.completed`, `payment_intent.succeeded`) |
+| `GET` | `/api/v1/payment/transactions/` | Admin API listing all payment transactions with filters |
+
+#### C. Admin Panel Communication APIs
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
 | `GET` | `/api/v1/admin/dashboard-stats/` | Live KPIs (Sales, Orders, Custom Requests, Chart.js dataset) |

@@ -1,7 +1,8 @@
-{% extends 'base.html' %}
+{% extends 'admin_panel/base_admin.html' %}
 {% load static %}
 
 {% block title %}Executive Dashboard | AURA Admin Portal{% endblock %}
+{% block admin_title %}Executive Analytics Dashboard{% endblock %}
 
 {% block extra_css %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -34,50 +35,62 @@
   <div class="row g-3 mb-4">
     
     <!-- Total Revenue -->
-    <div class="col-sm-6 col-lg-3">
-      <div class="admin-kpi-card">
+    <div class="col-sm-6 col-xl">
+      <div class="admin-kpi-card h-100">
         <div class="d-flex justify-content-between align-items-center mb-2">
-          <span class="small text-uppercase text-muted fw-bold">Total Sales Revenue</span>
+          <span class="small text-uppercase text-muted fw-bold">Total Sales</span>
           <div class="kpi-icon-bubble"><i class="bi bi-currency-rupee"></i></div>
         </div>
         <h3 class="fw-bold mb-0">₹{{ total_sales }}</h3>
-        <small class="text-success"><i class="bi bi-arrow-up-right me-1"></i> All Paid Orders</small>
+        <small class="text-success"><i class="bi bi-arrow-up-right me-1"></i> Paid Revenue</small>
+      </div>
+    </div>
+
+    <!-- Payment Transactions -->
+    <div class="col-sm-6 col-xl">
+      <div class="admin-kpi-card h-100">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="small text-uppercase text-muted fw-bold">Transactions</span>
+          <div class="kpi-icon-bubble" style="color: #635BFF; background: #F0F2FF;"><i class="bi bi-credit-card-2-front"></i></div>
+        </div>
+        <h3 class="fw-bold mb-0">{{ total_transactions }}</h3>
+        <small class="text-primary"><a href="{% url 'admin_transactions_list' %}" class="text-decoration-none" style="color: #635BFF;">{{ successful_transactions }} Settled (Stripe) &raquo;</a></small>
       </div>
     </div>
 
     <!-- Total Orders & Pending -->
-    <div class="col-sm-6 col-lg-3">
-      <div class="admin-kpi-card">
+    <div class="col-sm-6 col-xl">
+      <div class="admin-kpi-card h-100">
         <div class="d-flex justify-content-between align-items-center mb-2">
           <span class="small text-uppercase text-muted fw-bold">Total Orders</span>
           <div class="kpi-icon-bubble"><i class="bi bi-bag-check"></i></div>
         </div>
         <h3 class="fw-bold mb-0">{{ total_orders }}</h3>
-        <small class="text-warning fw-bold">{{ pending_orders }} Pending Confirmation</small>
+        <small class="text-warning fw-bold">{{ pending_orders }} Pending</small>
       </div>
     </div>
 
     <!-- Total Products -->
-    <div class="col-sm-6 col-lg-3">
-      <div class="admin-kpi-card">
+    <div class="col-sm-6 col-xl">
+      <div class="admin-kpi-card h-100">
         <div class="d-flex justify-content-between align-items-center mb-2">
-          <span class="small text-uppercase text-muted fw-bold">Products in Catalog</span>
+          <span class="small text-uppercase text-muted fw-bold">Inventory</span>
           <div class="kpi-icon-bubble"><i class="bi bi-gem"></i></div>
         </div>
         <h3 class="fw-bold mb-0">{{ total_products }}</h3>
-        <small class="text-muted"><a href="{% url 'admin_product_list' %}" class="text-gold">Manage Inventory &raquo;</a></small>
+        <small class="text-muted"><a href="{% url 'admin_product_list' %}" class="text-gold">Catalog &raquo;</a></small>
       </div>
     </div>
 
     <!-- Custom Design Requests -->
-    <div class="col-sm-6 col-lg-3">
-      <div class="admin-kpi-card">
+    <div class="col-sm-6 col-xl">
+      <div class="admin-kpi-card h-100">
         <div class="d-flex justify-content-between align-items-center mb-2">
-          <span class="small text-uppercase text-muted fw-bold">Custom Design Requests</span>
+          <span class="small text-uppercase text-muted fw-bold">Custom Designs</span>
           <div class="kpi-icon-bubble"><i class="bi bi-palette2"></i></div>
         </div>
         <h3 class="fw-bold mb-0">{{ total_custom_requests }}</h3>
-        <small class="text-danger fw-bold">{{ pending_custom_requests }} Awaiting Review</small>
+        <small class="text-danger fw-bold">{{ pending_custom_requests }} In Review</small>
       </div>
     </div>
 
@@ -128,6 +141,16 @@
               <div>
                 <div class="fw-bold">Fulfillment</div>
                 <small class="text-muted">Update AWB & status</small>
+              </div>
+            </a>
+          </div>
+
+          <div class="col-sm-6">
+            <a href="{% url 'admin_transactions_list' %}" class="btn btn-outline-dark w-100 py-3 text-start d-flex align-items-center gap-3">
+              <i class="bi bi-credit-card-2-front-fill fs-3" style="color: #635BFF;"></i>
+              <div>
+                <div class="fw-bold">Payment Ledger</div>
+                <small class="text-muted">Stripe & online txns</small>
               </div>
             </a>
           </div>
@@ -243,6 +266,94 @@
       </div>
     </div>
 
+  </div>
+
+  <!-- Live Payment Transactions & Stripe Gateway Ledger -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card border-gold-subtle shadow-sm bg-white rounded-3 overflow-hidden">
+        <div class="card-header bg-white border-bottom p-3 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge px-2 py-1 text-white" style="background:#635BFF;"><i class="bi bi-stripe me-1"></i> Stripe & Gateways</span>
+            <h5 class="serif-font fw-bold mb-0">Payment Transactions Ledger</h5>
+            <span class="badge bg-light text-muted border small">{{ total_transactions }} Recorded</span>
+          </div>
+          <a href="{% url 'admin_transactions_list' %}" class="small text-gold fw-bold text-decoration-none">
+            View All Transactions &raquo;
+          </a>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0 small">
+            <thead class="table-light text-uppercase">
+              <tr>
+                <th>Transaction ID</th>
+                <th>Order #</th>
+                <th>Customer</th>
+                <th>Gateway / Method</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Timestamp</th>
+                <th class="text-end">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for t in recent_transactions %}
+                <tr>
+                  <td>
+                    <div class="fw-bold font-monospace d-flex align-items-center gap-1">
+                      {% if 'Stripe' in t.payment_method %}
+                        <span class="badge text-white px-1" style="background:#635BFF; font-size: 0.65rem;"><i class="bi bi-stripe"></i></span>
+                      {% elif 'UPI' in t.payment_method %}
+                        <span class="badge bg-warning text-dark px-1" style="font-size: 0.65rem;"><i class="bi bi-qr-code"></i></span>
+                      {% else %}
+                        <span class="badge bg-secondary px-1" style="font-size: 0.65rem;"><i class="bi bi-cash"></i></span>
+                      {% endif %}
+                      {{ t.transaction_id }}
+                    </div>
+                    <div class="text-muted" style="font-size: 0.68rem;">{{ t.payment_details|truncatechars:40 }}</div>
+                  </td>
+                  <td>
+                    <a href="{% url 'admin_order_detail' t.order.order_number %}" class="fw-bold text-decoration-none font-monospace text-gold">
+                      {{ t.order.order_number }}
+                    </a>
+                  </td>
+                  <td>
+                    <div class="fw-bold text-dark">{{ t.order.customer_name }}</div>
+                    <small class="text-muted">{{ t.order.customer_phone }}</small>
+                  </td>
+                  <td>
+                    <span class="badge bg-light text-dark border">{{ t.payment_method }}</span>
+                  </td>
+                  <td class="fw-bold fs-6">₹{{ t.amount }}</td>
+                  <td>
+                    {% if t.status == 'SUCCESS' %}
+                      <span class="badge bg-success"><i class="bi bi-check-circle-fill me-1"></i> Success</span>
+                    {% elif t.status == 'PENDING' %}
+                      <span class="badge bg-warning text-dark"><i class="bi bi-clock-history me-1"></i> Pending</span>
+                    {% else %}
+                      <span class="badge bg-danger"><i class="bi bi-x-circle-fill me-1"></i> Failed</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-muted">{{ t.created_at|date:"d M, h:i A" }}</td>
+                  <td class="text-end">
+                    <a href="{% url 'admin_order_detail' t.order.order_number %}" class="btn btn-outline-dark btn-sm py-1 px-2" title="Manage Order">
+                      <i class="bi bi-eye"></i> Order
+                    </a>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="8" class="text-center py-4 text-muted">
+                    <i class="bi bi-credit-card-2-front fs-3 text-gold d-block mb-1"></i>
+                    No transaction records created yet. Complete a checkout to view transactions.
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </div>
 
 </div>

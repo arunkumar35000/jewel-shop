@@ -1,0 +1,474 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Executive Suite | AURA Admin Portal{% endblock %}</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  
+  <!-- Base Luxury Theme CSS -->
+  <link rel="stylesheet" href="{% static 'css/luxury-theme.css' %}">
+
+  <!-- Dedicated Admin Suite & Sidebar Styling -->
+  <style>
+    :root {
+      --admin-sidebar-width: 275px;
+      --admin-sidebar-bg: #12100E;
+      --admin-sidebar-hover: rgba(212, 175, 55, 0.14);
+      --admin-sidebar-active: rgba(212, 175, 55, 0.24);
+      --admin-topbar-height: 64px;
+      --admin-content-bg: #F4F6F9;
+    }
+
+    body.admin-body {
+      background-color: var(--admin-content-bg);
+      font-family: var(--font-sans, 'Montserrat', sans-serif);
+      margin: 0;
+      padding: 0;
+      color: #212529;
+      overflow-x: hidden;
+    }
+
+    /* Admin Wrapper */
+    .admin-wrapper {
+      display: flex;
+      min-height: 100vh;
+      width: 100%;
+    }
+
+    /* Dedicated Admin Sidebar */
+    .admin-sidebar {
+      width: var(--admin-sidebar-width);
+      min-width: var(--admin-sidebar-width);
+      background: radial-gradient(circle at top left, #1E1A14 0%, #0F0E0C 100%);
+      color: #EDEDED;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 1040;
+      border-right: 1px solid rgba(212, 175, 55, 0.3);
+      box-shadow: 4px 0 20px rgba(0, 0, 0, 0.25);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .admin-brand {
+      height: var(--admin-topbar-height);
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      border-bottom: 1px solid rgba(212, 175, 55, 0.22);
+      background: rgba(0, 0, 0, 0.4);
+      text-decoration: none;
+    }
+
+    .admin-brand-icon {
+      font-size: 1.5rem;
+      color: #D4AF37;
+    }
+
+    .admin-brand-title {
+      font-family: 'Cinzel', serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #FFFFFF;
+      line-height: 1.1;
+      margin: 0;
+    }
+
+    .admin-brand-subtitle {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: #D4AF37;
+      display: block;
+      font-weight: 600;
+    }
+
+    .admin-sidebar-menu {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.25rem 0.75rem;
+    }
+
+    .admin-nav-category {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #9E9382;
+      padding: 0.85rem 0.75rem 0.35rem;
+      font-weight: 700;
+    }
+
+    .admin-nav-link {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      padding: 0.68rem 0.95rem;
+      border-radius: 6px;
+      color: #D6D0C5;
+      font-size: 0.88rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      margin-bottom: 0.25rem;
+    }
+
+    .admin-nav-link i {
+      font-size: 1.15rem;
+      color: #D4AF37;
+      width: 24px;
+      text-align: center;
+    }
+
+    .admin-nav-link:hover {
+      background: var(--admin-sidebar-hover);
+      color: #FFFFFF;
+      transform: translateX(3px);
+    }
+
+    .admin-nav-link.active {
+      background: var(--admin-sidebar-active);
+      color: #FFFFFF;
+      font-weight: 600;
+      border-left: 4px solid #D4AF37;
+      box-shadow: 0 2px 8px rgba(212, 175, 55, 0.15);
+    }
+
+    .admin-nav-link .badge {
+      margin-left: auto;
+      font-size: 0.72rem;
+    }
+
+    .admin-sidebar-footer {
+      padding: 1rem;
+      border-top: 1px solid rgba(212, 175, 55, 0.2);
+      background: rgba(0, 0, 0, 0.45);
+    }
+
+    /* Main Container & Topbar */
+    .admin-main {
+      flex: 1;
+      margin-left: var(--admin-sidebar-width);
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      transition: margin-left 0.3s ease;
+    }
+
+    .admin-topbar {
+      height: var(--admin-topbar-height);
+      background: #FFFFFF;
+      border-bottom: 1px solid #E2E8F0;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 1020;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+    }
+
+    .admin-topbar-title {
+      font-family: 'Cinzel', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin: 0;
+      color: #111111;
+    }
+
+    .admin-content-container {
+      padding: 2rem 1.75rem;
+      flex: 1;
+    }
+
+    /* Mobile Backdrop and Toggle */
+    .sidebar-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(2px);
+      z-index: 1035;
+      display: none;
+      transition: opacity 0.3s ease;
+    }
+
+    /* Table Touch Scrolling Enhancement */
+    .table-responsive {
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+    }
+
+    @media (max-width: 991px) {
+      :root {
+        --admin-topbar-height: 58px;
+        --admin-sidebar-width: 260px;
+      }
+      .admin-sidebar {
+        transform: translateX(-100%);
+      }
+      .admin-sidebar.show {
+        transform: translateX(0);
+      }
+      .admin-main {
+        margin-left: 0 !important;
+      }
+      .sidebar-backdrop.show {
+        display: block;
+      }
+      .admin-content-container {
+        padding: 1.25rem 1rem;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .admin-content-container {
+        padding: 0.75rem 0.5rem;
+      }
+      .admin-content-container .container-fluid {
+        padding-left: 0.25rem !important;
+        padding-right: 0.25rem !important;
+        padding-top: 0.5rem !important;
+      }
+      .admin-topbar {
+        padding: 0 0.75rem;
+      }
+      .admin-brand {
+        padding: 0 1rem;
+      }
+      .admin-kpi-card {
+        padding: 16px;
+      }
+    }
+  </style>
+
+  {% block extra_css %}{% endblock %}
+</head>
+<body class="admin-body">
+
+  <!-- Mobile Backdrop Overlay -->
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleAdminSidebar()"></div>
+
+  <div class="admin-wrapper">
+    
+    <!-- DEDICATED ADMIN SIDEBAR -->
+    <aside class="admin-sidebar" id="adminSidebar">
+      
+      <!-- Brand Header -->
+      <div class="admin-brand d-flex align-items-center justify-content-between">
+        <a href="{% url 'admin_dashboard' %}" class="d-flex align-items-center gap-2 text-decoration-none">
+          <i class="bi bi-gem admin-brand-icon"></i>
+          <div>
+            <h1 class="admin-brand-title">AURA</h1>
+            <span class="admin-brand-subtitle">Executive Suite</span>
+          </div>
+        </a>
+        <button type="button" class="btn btn-sm text-white-50 p-1 d-lg-none border-0" onclick="toggleAdminSidebar()" aria-label="Close navigation">
+          <i class="bi bi-x-lg fs-5"></i>
+        </button>
+      </div>
+
+      <!-- Menu Navigation -->
+      <div class="admin-sidebar-menu">
+        
+        <div class="admin-nav-category">Main Overview</div>
+        
+        <a href="{% url 'admin_dashboard' %}" class="admin-nav-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+          <i class="bi bi-speedometer2"></i>
+          <span>Dashboard & Analytics</span>
+        </a>
+
+        <div class="admin-nav-category">Fulfillment & Operations</div>
+        
+        <a href="{% url 'admin_orders_list' %}" class="admin-nav-link {% if 'order' in request.resolver_match.url_name and 'product' not in request.resolver_match.url_name and 'custom' not in request.resolver_match.url_name %}active{% endif %}">
+          <i class="bi bi-box-seam"></i>
+          <span>Orders Management</span>
+        </a>
+
+        <a href="{% url 'admin_transactions_list' %}" class="admin-nav-link {% if 'transaction' in request.resolver_match.url_name %}active{% endif %}">
+          <i class="bi bi-credit-card-2-front"></i>
+          <span>Transactions & Stripe</span>
+        </a>
+
+        <a href="{% url 'admin_custom_requests_list' %}" class="admin-nav-link {% if 'custom_request' in request.resolver_match.url_name or 'quotation' in request.resolver_match.url_name %}active{% endif %}">
+          <i class="bi bi-palette2"></i>
+          <span>Custom Requests</span>
+        </a>
+
+        <a href="{% url 'admin_customers_list' %}" class="admin-nav-link {% if 'customer' in request.resolver_match.url_name %}active{% endif %}">
+          <i class="bi bi-people"></i>
+          <span>Customer Directory</span>
+        </a>
+
+        <div class="admin-nav-category">Inventory & Catalog</div>
+        
+        <a href="{% url 'admin_product_list' %}" class="admin-nav-link {% if request.resolver_match.url_name == 'admin_product_list' or request.resolver_match.url_name == 'admin_product_edit' %}active{% endif %}">
+          <i class="bi bi-collection"></i>
+          <span>Product Catalog</span>
+        </a>
+
+        <a href="{% url 'admin_product_create' %}" class="admin-nav-link {% if request.resolver_match.url_name == 'admin_product_create' %}active{% endif %}">
+          <i class="bi bi-plus-circle"></i>
+          <span>Add New Product</span>
+        </a>
+
+        <a href="{% url 'admin_category_list' %}" class="admin-nav-link {% if 'category' in request.resolver_match.url_name %}active{% endif %}">
+          <i class="bi bi-tags"></i>
+          <span>Categories</span>
+        </a>
+
+        <div class="admin-nav-category">System & Storefront</div>
+
+        <a href="/admin/" target="_blank" class="admin-nav-link">
+          <i class="bi bi-sliders"></i>
+          <span>Django Admin <i class="bi bi-box-arrow-up-right small text-muted ms-1" style="font-size:0.75rem;"></i></span>
+        </a>
+
+        <a href="{% url 'home' %}" target="_blank" class="admin-nav-link">
+          <i class="bi bi-globe"></i>
+          <span>Live Storefront <i class="bi bi-box-arrow-up-right small text-muted ms-1" style="font-size:0.75rem;"></i></span>
+        </a>
+
+      </div>
+
+      <!-- Sidebar Footer User Profile -->
+      <div class="admin-sidebar-footer">
+        <div class="d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-2 overflow-hidden">
+            <div class="rounded-circle bg-gold text-dark d-flex align-items-center justify-content-center fw-bold" style="width: 36px; height: 36px; min-width: 36px;">
+              {{ user.username|slice:":1"|upper }}
+            </div>
+            <div class="text-truncate">
+              <div class="small fw-bold text-white text-truncate">{{ user.get_full_name|default:user.username }}</div>
+              <div style="font-size: 0.68rem; color: #9E9382;">Administrator</div>
+            </div>
+          </div>
+          <a href="{% url 'logout' %}" class="btn btn-sm text-danger p-1" title="Sign Out">
+            <i class="bi bi-box-arrow-right fs-5"></i>
+          </a>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- MAIN ADMIN CONTENT AREA -->
+    <div class="admin-main">
+      
+      <!-- Topbar Header -->
+      <header class="admin-topbar">
+        
+        <div class="d-flex align-items-center gap-2 gap-sm-3 min-width-0">
+          <!-- Mobile Sidebar Toggle -->
+          <button class="btn btn-outline-dark btn-sm d-lg-none py-1 px-2" type="button" onclick="toggleAdminSidebar()" aria-label="Toggle Navigation">
+            <i class="bi bi-list fs-5"></i>
+          </button>
+          
+          <h2 class="admin-topbar-title d-none d-sm-block text-truncate">
+            {% block admin_title %}Administration Suite{% endblock %}
+          </h2>
+          <span class="admin-topbar-title d-sm-none text-truncate fw-bold" style="font-size: 0.95rem;">
+            AURA Suite
+          </span>
+        </div>
+
+        <!-- Right Quick Actions -->
+        <div class="d-flex align-items-center gap-3">
+          
+          <!-- Live Gold Ticker Pill -->
+          <div class="d-none d-md-flex align-items-center gap-2 px-3 py-1 bg-light rounded-pill border small">
+            <i class="bi bi-graph-up-arrow text-gold"></i>
+            <span class="fw-bold">24K:</span> ₹{{ DAILY_GOLD_RATES.24K }}/g
+            <span class="text-muted">|</span>
+            <span class="fw-bold">22K:</span> ₹{{ DAILY_GOLD_RATES.22K }}/g
+          </div>
+
+          <a href="{% url 'admin_product_create' %}" class="btn btn-gold btn-sm d-none d-sm-inline-flex align-items-center gap-1">
+            <i class="bi bi-plus-lg"></i> Add Product
+          </a>
+
+          <a href="{% url 'home' %}" target="_blank" class="btn btn-outline-dark btn-sm d-flex align-items-center gap-1" title="View Customer Website">
+            <i class="bi bi-eye"></i> <span class="d-none d-sm-inline">View Store</span>
+          </a>
+
+          <!-- Profile Badge -->
+          <div class="dropdown">
+            <button class="btn btn-sm btn-light border dropdown-toggle d-flex align-items-center gap-2 py-1 px-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-person-circle text-gold fs-5"></i>
+              <span class="d-none d-md-inline small fw-bold">{{ user.username }}</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-gold-subtle small">
+              <li><a class="dropdown-item py-2" href="{% url 'admin_dashboard' %}"><i class="bi bi-speedometer2 text-gold me-2"></i>Dashboard</a></li>
+              <li><a class="dropdown-item py-2" href="/admin/" target="_blank"><i class="bi bi-sliders text-gold me-2"></i>Django Admin</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item py-2 text-danger" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right me-2"></i>Sign Out</a></li>
+            </ul>
+          </div>
+
+        </div>
+
+      </header>
+
+      <!-- Main Body Container -->
+      <main class="admin-content-container">
+        
+        <!-- Flash Messages -->
+        {% include 'includes/messages.html' %}
+
+        <!-- Content Block -->
+        {% block content %}{% endblock %}
+
+      </main>
+
+    </div>
+
+  </div>
+
+  <!-- Bootstrap 5 JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Mobile Sidebar Toggle Script -->
+  <script>
+    function toggleAdminSidebar() {
+      const sidebar = document.getElementById('adminSidebar');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      if (sidebar && backdrop) {
+        sidebar.classList.toggle('show');
+        backdrop.classList.toggle('show');
+      }
+    }
+
+    // Dismiss admin sidebar on Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        const sidebar = document.getElementById('adminSidebar');
+        const backdrop = document.getElementById('sidebarBackdrop');
+        if (sidebar && sidebar.classList.contains('show')) {
+          sidebar.classList.remove('show');
+          backdrop.classList.remove('show');
+        }
+      }
+    });
+  </script>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>
+

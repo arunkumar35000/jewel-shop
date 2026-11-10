@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.db.models import Sum, Count, Q
 from django.core.paginator import Paginator
 from products.models import Product, Category
-from orders.models import Order, OrderItem
+from orders.models import Order, OrderItem, Payment
 from custom_orders.models import CustomOrder, CustomOrderQuotation
 from custom_orders.forms import QuotationForm
 
@@ -32,6 +32,12 @@ def admin_dashboard(request):
     sales_agg = Order.objects.filter(payment_status='PAID').aggregate(Sum('grand_total'))
     total_sales = sales_agg['grand_total__sum'] or Decimal('0.00')
 
+    # Transactions & Stripe Metrics
+    recent_transactions = Payment.objects.select_related('order').all().order_by('-created_at')[:8]
+    total_transactions = Payment.objects.count()
+    successful_transactions = Payment.objects.filter(status='SUCCESS').count()
+    stripe_transactions_count = Payment.objects.filter(payment_method__icontains='Stripe').count()
+
     # Category product distribution for Chart.js
     category_counts = Category.objects.annotate(prod_count=Count('products')).values('name', 'prod_count')
     cat_labels = [c['name'] for c in category_counts]
@@ -49,12 +55,55 @@ def admin_dashboard(request):
         'total_custom_requests': total_custom_requests,
         'pending_custom_requests': pending_custom_requests,
         'total_sales': total_sales,
+        'recent_transactions': recent_transactions,
+        'total_transactions': total_transactions,
+        'successful_transactions': successful_transactions,
+        'stripe_transactions_count': stripe_transactions_count,
         'recent_orders': recent_orders,
         'recent_custom_requests': recent_custom_requests,
         'cat_labels': cat_labels,
         'cat_data': cat_data,
     }
     return render(request, 'admin_panel/dashboard.html', context)
+
+
+@user_passes_test(is_admin)
+def admin_transactions_list(request):
+    """
+    Dedicated view for full payment transactions ledger
+    displaying Stripe, UPI, and card payments.
+    """
+    transactions = Payment.objects.select_related('order').all().order_by('-created_at')
+
+    status_filter = request.GET.get('status')
+    if status_filter:
+        transactions = transactions.filter(status=status_filter)
+
+    method_filter = request.GET.get('method')
+    if method_filter:
+        transactions = transactions.filter(payment_method__icontains=method_filter)
+
+    q = request.GET.get('q', '').strip()
+    if q:
+        transactions = transactions.filter(
+            Q(transaction_id__icontains=q) |
+            Q(order__order_number__icontains=q) |
+            Q(order__customer_name__icontains=q) |
+            Q(order__customer_email__icontains=q)
+        )
+
+    paginator = Paginator(transactions, 15)
+    page = request.GET.get('page')
+    page_obj = paginator.get_page(page)
+
+    return render(request, 'admin_panel/transactions_list.html', {
+        'transactions': page_obj,
+        'status_filter': status_filter,
+        'method_filter': method_filter,
+        'q': q,
+        'total_count': transactions.count(),
+        'successful_count': Payment.objects.filter(status='SUCCESS').count(),
+    })
 
 
 @user_passes_test(is_admin)

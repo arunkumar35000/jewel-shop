@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'admin_panel/base_admin.html' %}
 {% block title %}Manage Order #{{ order.order_number }} | AURA Admin{% endblock %}
 
 {% block content %}
@@ -68,6 +68,51 @@
           <p class="mb-1"><strong>Phone:</strong> {{ order.customer_phone }}</p>
           <p class="mb-1"><strong>Shipping Address:</strong> {{ order.shipping_address }}</p>
           <p class="mb-0"><strong>Billing Address:</strong> {{ order.billing_address }}</p>
+        </div>
+      </div>
+
+      <!-- Payment Transactions -->
+      <div class="card p-4 border-gold-subtle shadow-sm bg-white rounded-3 mt-4">
+        <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+          <h5 class="serif-font fw-bold mb-0">Payment Transactions ({{ order.payments.count }})</h5>
+          <span class="badge {% if order.payment_status == 'PAID' %}bg-success{% else %}bg-warning text-dark{% endif %}">
+            Order Status: {{ order.get_payment_status_display }}
+          </span>
+        </div>
+        <div class="table-responsive">
+          <table class="table small align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Txn ID</th>
+                <th>Method</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Timestamp</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in order.payments.all %}
+                <tr>
+                  <td>
+                    <span class="font-monospace fw-bold text-dark">{{ p.transaction_id }}</span>
+                    {% if p.payment_details %}
+                      <div class="text-muted" style="font-size:0.7rem;">{{ p.payment_details }}</div>
+                    {% endif %}
+                  </td>
+                  <td>{{ p.payment_method }}</td>
+                  <td class="fw-bold">₹{{ p.amount }}</td>
+                  <td>
+                    <span class="badge {% if p.status == 'SUCCESS' %}bg-success{% elif p.status == 'PENDING' %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                      {{ p.get_status_display }}
+                    </span>
+                  </td>
+                  <td class="text-muted">{{ p.created_at|date:"d M Y, h:i A" }}</td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="5" class="text-center py-3 text-muted">No gateway transactions recorded yet.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
       </div>
 

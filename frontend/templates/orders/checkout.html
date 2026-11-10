@@ -128,18 +128,47 @@
 
           <div class="d-flex flex-column gap-3">
             
-            <!-- UPI / QR Option -->
-            <div class="p-3 border rounded border-gold-subtle bg-light">
+            <!-- Stripe Card Option (Option 1 - Default & Recommended) -->
+            <div class="p-3 border rounded border-gold shadow-sm bg-white">
               <div class="form-check">
-                <input class="form-check-input ms-0 me-3" type="radio" name="payment_method" id="payUPI" value="UPI" checked onchange="togglePaymentPanels('upi')">
-                <label class="form-check-label" for="payUPI">
-                  <div class="fw-bold text-dark"><i class="bi bi-qr-code text-gold me-2"></i> UPI / Instant QR Code (Recommended)</div>
-                  <small class="text-muted">Pay securely using Google Pay, PhonePe, Paytm, or BHIM UPI.</small>
+                <input class="form-check-input ms-0 me-3" type="radio" name="payment_method" id="payStripe" value="STRIPE" checked onchange="togglePaymentPanels('stripe')">
+                <label class="form-check-label" for="payStripe">
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="fw-bold text-dark fs-6"><i class="bi bi-credit-card-2-front text-gold me-2"></i> Stripe Secure Payment (Cards & Global)</span>
+                    <span class="badge text-white px-2 py-1" style="background-color: #635BFF; font-size: 0.72rem;"><i class="bi bi-stripe me-1"></i> RECOMMENDED</span>
+                  </div>
+                  <small class="text-muted">Pay securely with Visa, Mastercard, RuPay, Amex & International Cards via Stripe Gateway.</small>
                 </label>
               </div>
 
-              <!-- UPI Interactive Panel -->
-              <div id="panelUPI" class="mt-3 p-3 bg-white rounded border border-gold-subtle text-center">
+              <!-- Stripe Info Panel (Open by Default) -->
+              <div id="panelStripe" class="mt-3 p-3 bg-light rounded border border-gold-subtle small">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                  <i class="bi bi-shield-check text-success fs-4"></i>
+                  <div>
+                    <span class="fw-bold text-dark">Stripe 256-Bit Encrypted Direct Checkout</span>
+                    <div class="text-muted" style="font-size: 0.78rem;">Upon clicking "Pay with Stripe", you will be securely redirected to Stripe's encrypted payment page to complete your payment of <strong>₹{{ cart.grand_total }}</strong>.</div>
+                  </div>
+                </div>
+                <div class="d-flex gap-2 align-items-center mt-2 pt-2 border-top text-muted" style="font-size: 0.72rem;">
+                  <i class="bi bi-lock-fill text-gold"></i>
+                  <span>Zero card details are stored on our servers. 100% PCI-DSS compliant.</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- UPI / QR Option (Option 2) -->
+            <div class="p-3 border rounded border-gold-subtle">
+              <div class="form-check">
+                <input class="form-check-input ms-0 me-3" type="radio" name="payment_method" id="payUPI" value="UPI" onchange="togglePaymentPanels('upi')">
+                <label class="form-check-label" for="payUPI">
+                  <div class="fw-bold text-dark"><i class="bi bi-qr-code text-gold me-2"></i> UPI / Instant QR Code</div>
+                  <small class="text-muted">Pay using Google Pay, PhonePe, Paytm, or BHIM UPI.</small>
+                </label>
+              </div>
+
+              <!-- UPI Interactive Panel (Hidden by Default) -->
+              <div id="panelUPI" class="mt-3 p-3 bg-white rounded border border-gold-subtle text-center" style="display: none;">
                 <div class="row align-items-center g-3">
                   <div class="col-sm-5 text-center">
                     <div class="p-2 border rounded bg-white shadow-sm d-inline-block">
@@ -159,39 +188,9 @@
                       <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText('aurajewels@okhdfcbank'); showToast('UPI ID Copied!', 'info');"><i class="bi bi-copy"></i></button>
                     </div>
                     <small class="text-success d-block mb-1"><i class="bi bi-shield-check me-1"></i> Instant 0% Convenience Fee</small>
-                    <small class="text-muted">Once order is confirmed, transaction reference will be auto-linked.</small>
+                    <small class="text-muted">Once payment is made, transaction reference will be linked.</small>
                   </div>
                 </div>
-              </div>
-            </div>
-
-            <!-- Card / NetBanking Option -->
-            <div class="p-3 border rounded">
-              <div class="form-check">
-                <input class="form-check-input ms-0 me-3" type="radio" name="payment_method" id="payCard" value="ONLINE_CARD" onchange="togglePaymentPanels('card')">
-                <label class="form-check-label" for="payCard">
-                  <div class="fw-bold text-dark"><i class="bi bi-credit-card-2-front text-gold me-2"></i> Credit / Debit Card & NetBanking</div>
-                  <small class="text-muted">Visa, Mastercard, RuPay, Amex & All Major Indian Banks.</small>
-                </label>
-              </div>
-
-              <!-- Card Simulated Panel -->
-              <div id="panelCard" class="mt-3 p-3 bg-light rounded border small" style="display: none;">
-                <div class="row g-2">
-                  <div class="col-12">
-                    <label class="form-label mb-1">Card Number</label>
-                    <input type="text" class="form-control form-control-sm font-monospace" placeholder="4111 2222 3333 4444" maxlength="19">
-                  </div>
-                  <div class="col-6">
-                    <label class="form-label mb-1">Expiry Date</label>
-                    <input type="text" class="form-control form-control-sm" placeholder="MM/YY" maxlength="5">
-                  </div>
-                  <div class="col-6">
-                    <label class="form-label mb-1">CVV / Security Code</label>
-                    <input type="password" class="form-control form-control-sm" placeholder="123" maxlength="4">
-                  </div>
-                </div>
-                <small class="text-muted d-block mt-2"><i class="bi bi-lock-fill text-gold me-1"></i> Simulated 256-Bit SSL payment gateway.</small>
               </div>
             </div>
 
@@ -287,12 +286,12 @@
             <span class="fs-3 fw-bold text-dark">₹{{ cart.grand_total }}</span>
           </div>
 
-          <button type="submit" class="btn btn-gold btn-lg w-100 py-3 fw-bold shadow-lg">
-            <i class="bi bi-shield-check me-2"></i> Place & Confirm Order
+          <button type="submit" id="btnPlaceOrder" class="btn btn-lg w-100 py-3 fw-bold shadow-lg" style="background: linear-gradient(135deg, #635BFF 0%, #4B45D6 100%); color: #FFFFFF; border: none;">
+            <i class="bi bi-stripe me-2 fs-5"></i> Pay ₹{{ cart.grand_total }} with Stripe
           </button>
 
           <div class="mt-4 p-3 bg-light rounded text-center small text-muted border">
-            <i class="bi bi-lock-fill text-gold me-1"></i> By clicking "Place Order", your precious jewellery will be reserved, hallmarked, and dispatched with transit insurance.
+            <i class="bi bi-lock-fill text-gold me-1"></i> 256-Bit SSL Encrypted checkout. Your order will be reserved and transit insured.
           </div>
         </div>
       </div>
@@ -306,14 +305,45 @@
 <script>
   function togglePaymentPanels(method) {
     const pUpi = document.getElementById('panelUPI');
-    const pCard = document.getElementById('panelCard');
+    const pStripe = document.getElementById('panelStripe');
     const pCod = document.getElementById('panelCOD');
     const pBank = document.getElementById('panelBank');
+    const btn = document.getElementById('btnPlaceOrder');
+
     if (pUpi) pUpi.style.display = method === 'upi' ? 'block' : 'none';
-    if (pCard) pCard.style.display = method === 'card' ? 'block' : 'none';
+    if (pStripe) pStripe.style.display = (method === 'stripe' || method === 'card') ? 'block' : 'none';
     if (pCod) pCod.style.display = method === 'cod' ? 'block' : 'none';
     if (pBank) pBank.style.display = method === 'bank' ? 'block' : 'none';
+
+    if (btn) {
+      if (method === 'stripe' || method === 'card') {
+        btn.innerHTML = '<i class="bi bi-stripe me-2 fs-5"></i> Pay ₹{{ cart.grand_total }} with Stripe';
+        btn.style.background = 'linear-gradient(135deg, #635BFF 0%, #4B45D6 100%)';
+        btn.style.borderColor = '#635BFF';
+        btn.style.color = '#FFFFFF';
+      } else if (method === 'upi') {
+        btn.innerHTML = '<i class="bi bi-qr-code me-2"></i> Confirm & Pay with UPI';
+        btn.style.background = 'var(--gold-gradient)';
+        btn.style.borderColor = 'var(--gold-primary)';
+        btn.style.color = '#0D0D0D';
+      } else if (method === 'cod') {
+        btn.innerHTML = '<i class="bi bi-cash-stack me-2"></i> Place Cash on Delivery Order';
+        btn.style.background = '#212529';
+        btn.style.borderColor = '#212529';
+        btn.style.color = '#FFFFFF';
+      } else if (method === 'bank') {
+        btn.innerHTML = '<i class="bi bi-bank me-2"></i> Confirm Bank Transfer Order';
+        btn.style.background = '#212529';
+        btn.style.borderColor = '#212529';
+        btn.style.color = '#FFFFFF';
+      }
+    }
   }
+
+  // Initialize on load
+  document.addEventListener('DOMContentLoaded', function() {
+    togglePaymentPanels('stripe');
+  });
 </script>
 {% endblock %}
 
