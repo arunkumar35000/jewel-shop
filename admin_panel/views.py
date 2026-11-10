@@ -54,7 +54,7 @@ def admin_dashboard(request):
         'cat_labels': cat_labels,
         'cat_data': cat_data,
     }
-    return render(request, 'admin_portal/dashboard.html', context)
+    return render(request, 'admin_panel/dashboard.html', context)
 
 
 @user_passes_test(is_admin)
@@ -77,7 +77,7 @@ def admin_orders_list(request):
     page = request.GET.get('page')
     page_obj = paginator.get_page(page)
 
-    return render(request, 'admin_portal/orders_list.html', {
+    return render(request, 'admin_panel/orders_list.html', {
         'orders': page_obj,
         'status_filter': status_filter,
         'q': q,
@@ -106,7 +106,7 @@ def admin_order_detail(request, order_number):
             messages.success(request, f"Order #{order.order_number} status updated successfully.")
             return redirect('admin_order_detail', order_number=order.order_number)
 
-    return render(request, 'admin_portal/order_detail.html', {'order': order})
+    return render(request, 'admin_panel/order_detail.html', {'order': order})
 
 
 @user_passes_test(is_admin)
@@ -130,7 +130,7 @@ def admin_custom_requests_list(request):
     page = request.GET.get('page')
     page_obj = paginator.get_page(page)
 
-    return render(request, 'admin_portal/custom_requests_list.html', {
+    return render(request, 'admin_panel/custom_requests_list.html', {
         'requests': page_obj,
         'selected_status': status,
         'q': q,
@@ -156,7 +156,7 @@ def admin_custom_request_detail(request, request_id):
             messages.success(request, f"Request #{custom_order.request_id} updated.")
             return redirect('admin_custom_request_detail', request_id=custom_order.request_id)
 
-    return render(request, 'admin_portal/custom_request_detail.html', {
+    return render(request, 'admin_panel/custom_request_detail.html', {
         'order': custom_order,
         'images': custom_order.reference_images.all(),
         'quotations': custom_order.quotations.all(),
@@ -190,7 +190,7 @@ def admin_quotation_create(request, request_id):
         }
         form = QuotationForm(initial=initial)
 
-    return render(request, 'admin_portal/quotation_form.html', {
+    return render(request, 'admin_panel/quotation_form.html', {
         'form': form,
         'order': custom_order
     })
@@ -216,7 +216,7 @@ def admin_customers_list(request):
     page = request.GET.get('page')
     page_obj = paginator.get_page(page)
 
-    return render(request, 'admin_portal/customers_list.html', {'customers': page_obj, 'q': q})
+    return render(request, 'admin_panel/customers_list.html', {'customers': page_obj, 'q': q})
 
 
 @user_passes_test(is_admin)
@@ -235,7 +235,7 @@ def admin_customer_detail(request, customer_id):
     custom_requests = customer.custom_orders.all().order_by('-created_at')
     addresses = customer.addresses.all()
 
-    return render(request, 'admin_portal/customer_detail.html', {
+    return render(request, 'admin_panel/customer_detail.html', {
         'customer': customer,
         'orders': orders,
         'custom_requests': custom_requests,

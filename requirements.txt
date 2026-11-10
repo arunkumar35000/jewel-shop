@@ -1,0 +1,16 @@
+# Core Framework & APIs
+Django==3.2.25
+djangorestframework==3.15.1
+asgiref==3.7.2
+sqlparse==0.4.4
+
+# Database Drivers
+PyMySQL==1.1.1
+
+# Image Processing & Media
+Pillow==9.5.0
+
+# Utilities
+pytz==2021.1
+requests==2.31.0
+

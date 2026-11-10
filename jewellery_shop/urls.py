@@ -13,8 +13,9 @@ urlpatterns = [
     path('checkout/', order_views.checkout_view, name='checkout'),
     path('orders/', include('orders.urls')),
     path('custom-jewellery/', include('custom_orders.urls')),
-    path('admin-portal/', include('admin_portal.urls')),
-    path('api/v1/', include('api.urls')),
+    path('admin-panel/', include('admin_panel.urls')),
+    path('admin-portal/', include('admin_panel.urls')),
+    path('api/v1/', include('backend_api.urls')),
 ]
 
 if settings.DEBUG:

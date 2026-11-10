@@ -41,8 +41,8 @@ INSTALLED_APPS = [
     'cart',
     'orders',
     'custom_orders',
-    'admin_portal',
-    'api',
+    'admin_panel',
+    'backend_api',
 ]
 
 MIDDLEWARE = [
@@ -60,7 +60,10 @@ ROOT_URLCONF = 'jewellery_shop.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [
+            BASE_DIR / 'frontend' / 'templates',
+            BASE_DIR / 'admin_panel' / 'templates',
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -149,7 +152,7 @@ USE_TZ = True
 
 # Static & Media Files
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
+STATICFILES_DIRS = [BASE_DIR / 'frontend' / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MEDIA_URL = '/media/'
