@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block title %}Order Confirmed #{{ order.order_number }} | AURA{% endblock %}
+
+{% block content %}
+<div class="container py-5 my-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      
+      <div class="card p-4 p-md-5 border-gold shadow-lg bg-white rounded-3 text-center mb-4">
+        <div class="fs-1 text-gold mb-3"><i class="bi bi-patch-check-fill"></i></div>
+        <h2 class="serif-font display-6 fw-bold mb-1">Thank You for Your Order!</h2>
+        <p class="text-muted">
+          Your order has been placed successfully. Order Number: <br>
+          <span class="fs-4 fw-bold font-monospace text-dark">{{ order.order_number }}</span>
+        </p>
+
+        <div class="row g-3 text-start bg-light p-4 rounded border my-4 small">
+          <div class="col-md-6">
+            <strong>Customer:</strong> {{ order.customer_name }}<br>
+            <strong>Email:</strong> {{ order.customer_email }}<br>
+            <strong>Phone:</strong> {{ order.customer_phone }}
+          </div>
+          <div class="col-md-6">
+            <strong>Payment Method:</strong> {{ order.get_payment_method_display }}<br>
+            <strong>Payment Status:</strong> <span class="badge bg-success">{{ order.get_payment_status_display }}</span><br>
+            <strong>Estimated Delivery:</strong> {{ order.estimated_delivery|date:"l, d M Y" }}
+          </div>
+          <div class="col-12 border-top pt-2 mt-2">
+            <strong>Delivery Destination:</strong> {{ order.shipping_address }}
+          </div>
+        </div>
+
+        <!-- Ordered Items Summary -->
+        <div class="text-start mb-4">
+          <h5 class="serif-font fw-bold border-bottom pb-2">Ordered Heirlooms ({{ order.items.count }})</h5>
+          <div class="table-responsive">
+            <table class="table small align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Product</th>
+                  <th>Purity & Wt</th>
+                  <th>Qty</th>
+                  <th class="text-end">Total Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in order.items.all %}
+                  <tr>
+                    <td>
+                      <div class="fw-bold">{{ item.product_name }}</div>
+                      <small class="text-muted">{{ item.product_sku }}</small>
+                    </td>
+                    <td>{{ item.purity }} • {{ item.gross_weight }}g</td>
+                    <td>{{ item.quantity }}</td>
+                    <td class="text-end fw-bold">₹{{ item.total_price }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+              <tfoot class="border-top">
+                <tr>
+                  <th colspan="3" class="text-end">Grand Total (incl. Making & GST):</th>
+                  <th class="text-end text-gold-dark fs-6">₹{{ order.grand_total }}</th>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="d-flex flex-wrap gap-3 justify-content-center">
+          <a href="{% url 'order_tracking' order.order_number %}" class="btn btn-gold px-4 py-2 fw-bold">
+            <i class="bi bi-geo-alt-fill me-1"></i> Track Order Status
+          </a>
+          <a href="{% url 'order_invoice' order.order_number %}" class="btn btn-dark-luxury px-4 py-2 fw-bold" target="_blank">
+            <i class="bi bi-printer-fill me-1"></i> View & Print Tax Invoice
+          </a>
+          <a href="{% url 'home' %}" class="btn btn-outline-dark px-4 py-2">
+            Continue Shopping
+          </a>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+

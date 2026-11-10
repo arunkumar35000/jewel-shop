@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} | AURA Jewellery{% endblock %}
+
+{% block content %}
+<div class="container py-5 my-3">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card p-4 p-md-5 border-gold-subtle shadow-sm bg-white rounded-3">
+        <h3 class="serif-font fw-bold mb-4">{{ title }}</h3>
+
+        <form method="POST">
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label small fw-bold">Address Type</label>
+              {{ form.address_type }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">Full Name *</label>
+              {{ form.full_name }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">Mobile Phone (+91) *</label>
+              {{ form.phone }}
+            </div>
+            <div class="col-12">
+              <label class="form-label small fw-bold">Street Address (House/Flat No, Apartment, Street) *</label>
+              {{ form.street_address }}
+            </div>
+            <div class="col-12">
+              <label class="form-label small fw-bold">Landmark</label>
+              {{ form.landmark }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">City *</label>
+              {{ form.city }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">State *</label>
+              {{ form.state }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">PIN Code *</label>
+              {{ form.pincode }}
+            </div>
+            <div class="col-12">
+              <div class="form-check mt-2">
+                {{ form.is_default }}
+                <label class="form-check-label small" for="{{ form.is_default.id_for_label }}">
+                  Set as default delivery address
+                </label>
+              </div>
+            </div>
+
+            <div class="col-12 mt-4 d-flex gap-3">
+              <button type="submit" class="btn btn-gold flex-grow-1 py-2 fw-bold">Save Address</button>
+              <a href="{% url 'address_list' %}" class="btn btn-outline-dark px-4 py-2">Cancel</a>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

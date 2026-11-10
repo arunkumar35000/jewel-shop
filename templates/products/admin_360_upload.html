@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block title %}Manage 360° Sequence: {{ product.name }} | AURA Admin{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <span class="badge bg-gold text-dark text-uppercase fw-bold">Multi-Angle 360° Studio</span>
+      <h2 class="serif-font fw-bold mt-1">{{ product.name }}</h2>
+      <p class="text-muted small mb-0">Total frames in 360 rotation sequence: <strong>{{ frames.count }}</strong></p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'product_detail' product.slug %}" class="btn btn-outline-gold" target="_blank">
+        <i class="bi bi-box-arrow-up-right me-1"></i> Preview on Storefront
+      </a>
+      <a href="{% url 'admin_product_edit' product.pk %}" class="btn btn-outline-dark">
+        <i class="bi bi-pencil me-1"></i> Edit Product
+      </a>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    
+    <!-- Upload Form Card -->
+    <div class="col-lg-4">
+      <div class="card p-4 border-gold-subtle shadow-sm bg-white rounded-3">
+        <h5 class="serif-font fw-bold mb-3 border-bottom pb-2">Upload 360° Sequence Frames</h5>
+        <p class="text-muted small mb-3">
+          Upload multi-angle sequential frames (e.g. 16, 24, or 36 images photographed around the jewellery piece at equal degree increments).
+        </p>
+
+        <form method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Select Multiple Frame Images (JPG, PNG, WEBP) *</label>
+            <input type="file" name="frame_images" class="form-control" multiple required accept="image/*">
+            <div class="form-text small">Hold Ctrl or Shift to select all sequence files at once.</div>
+          </div>
+
+          <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="replaceExisting" name="replace_existing" value="1">
+            <label class="form-check-label small" for="replaceExisting">
+              Replace existing frames (clears current 360 sequence)
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-gold w-100 py-2 fw-bold">
+            <i class="bi bi-cloud-arrow-up-fill me-1"></i> Upload Sequence Frames
+          </button>
+        </form>
+      </div>
+
+      <!-- Instructions Guide -->
+      <div class="card p-3 mt-4 bg-light border">
+        <h6 class="fw-bold small text-uppercase mb-2"><i class="bi bi-info-circle text-gold me-1"></i> 360 Photography Best Practices</h6>
+        <ul class="small text-muted ps-3 mb-0">
+          <li>Use a motorized turntable with 15° rotation increments (24 frames total).</li>
+          <li>Keep lighting consistent with soft reflection diffusers.</li>
+          <li>Number frames sequentially (e.g. <code>frame_01.jpg</code> to <code>frame_24.jpg</code>).</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Current Sequence Frames Grid -->
+    <div class="col-lg-8">
+      <div class="card p-4 border-gold-subtle shadow-sm bg-white rounded-3">
+        <h5 class="serif-font fw-bold mb-3 border-bottom pb-2">Sequential Frame Sequence ({{ frames.count }} Frames)</h5>
+        
+        {% if frames %}
+          <div class="row row-cols-3 row-cols-md-4 g-3">
+            {% for frame in frames %}
+              <div class="col text-center">
+                <div class="card h-100 border p-2 position-relative shadow-sm">
+                  <img src="{{ frame.image.url }}" alt="Frame {{ frame.frame_number }}" class="img-fluid rounded mb-2" style="height: 110px; object-fit: contain; background: #FAF7F2;">
+                  <div class="fw-bold small text-dark">Frame #{{ frame.frame_number }}</div>
+                  
+                  <form action="{% url 'admin_delete_360_frame' frame.id %}" method="POST" onsubmit="return confirm('Delete Frame {{ frame.frame_number }}?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm text-danger p-0 mt-1" title="Delete Frame">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </form>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-center py-5 text-muted">
+            <i class="bi bi-arrow-repeat fs-1 text-gold mb-2 d-block"></i>
+            <h6>No 360° frames uploaded yet for this product.</h6>
+            <p class="small">Upload frame images on the left panel to enable interactive 360° rotation on storefront.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+

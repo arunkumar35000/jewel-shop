@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block title %}Track Shipment #{{ order.order_number }} | AURA{% endblock %}
+
+{% block content %}
+<div class="py-4 bg-white border-bottom">
+  <div class="container">
+    <span class="text-gold text-uppercase fw-bold small">Logistics & Transit Insurance</span>
+    <h1 class="serif-font display-6 fw-bold mb-0">Track Order #{{ order.order_number }}</h1>
+  </div>
+</div>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      
+      <div class="card p-4 p-md-5 border-gold shadow-sm bg-white rounded-3 mb-4">
+        
+        <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+          <div>
+            <div class="text-muted small">Estimated Delivery By:</div>
+            <h4 class="serif-font fw-bold text-dark mb-0">{{ order.estimated_delivery|date:"l, d M Y" }}</h4>
+          </div>
+          <div class="text-end">
+            <span class="badge bg-dark border border-gold text-gold p-2 fs-6">
+              {{ order.get_order_status_display }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Timeline Milestones Vertical/Horizontal -->
+        <div class="my-4">
+          <div class="d-flex flex-column gap-4 border-start border-2 border-gold ps-4 ms-3">
+            
+            <div class="position-relative">
+              <span class="position-absolute top-0 start-0 translate-middle-x rounded-circle bg-gold p-2" style="left: -25px;"></span>
+              <h6 class="fw-bold mb-1">Order Confirmed & Payment Verified</h6>
+              <small class="text-muted">{{ order.created_at|date:"d M Y, h:i A" }} • Insured order logged in flagship registry.</small>
+            </div>
+
+            <div class="position-relative">
+              <span class="position-absolute top-0 start-0 translate-middle-x rounded-circle {% if order.order_status in 'CRAFTING,SHIPPED,OUT_FOR_DELIVERY,DELIVERED' %}bg-gold{% else %}bg-secondary{% endif %} p-2" style="left: -25px;"></span>
+              <h6 class="fw-bold mb-1">BIS Hallmarking & Quality Assay</h6>
+              <small class="text-muted">Laser HUID authenticity stamping and gemstone claw verification.</small>
+            </div>
+
+            <div class="position-relative">
+              <span class="position-absolute top-0 start-0 translate-middle-x rounded-circle {% if order.order_status in 'SHIPPED,OUT_FOR_DELIVERY,DELIVERED' %}bg-gold{% else %}bg-secondary{% endif %} p-2" style="left: -25px;"></span>
+              <h6 class="fw-bold mb-1">Dispatched via {{ order.courier_partner }}</h6>
+              <small class="text-muted">
+                {% if order.tracking_number %}AWB: <strong>{{ order.tracking_number }}</strong> • Tamper-evident secure packaging.{% else %}Packaging in progress.{% endif %}
+              </small>
+            </div>
+
+            <div class="position-relative">
+              <span class="position-absolute top-0 start-0 translate-middle-x rounded-circle {% if order.order_status in 'OUT_FOR_DELIVERY,DELIVERED' %}bg-gold{% else %}bg-secondary{% endif %} p-2" style="left: -25px;"></span>
+              <h6 class="fw-bold mb-1">Out for Insured Delivery</h6>
+              <small class="text-muted">Courier executive assigned for signature delivery.</small>
+            </div>
+
+            <div class="position-relative">
+              <span class="position-absolute top-0 start-0 translate-middle-x rounded-circle {% if order.order_status == 'DELIVERED' %}bg-success{% else %}bg-secondary{% endif %} p-2" style="left: -25px;"></span>
+              <h6 class="fw-bold mb-1">Delivered to Patron</h6>
+              <small class="text-muted">Completed transaction with customer signature.</small>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="border-top pt-3 d-flex justify-content-between align-items-center">
+          <a href="{% url 'order_detail' order.order_number %}" class="btn btn-outline-dark btn-sm">
+            <i class="bi bi-arrow-left me-1"></i> Back to Order Details
+          </a>
+          <a href="{% url 'order_invoice' order.order_number %}" class="btn btn-gold btn-sm" target="_blank">
+            <i class="bi bi-printer me-1"></i> Print Tax Invoice
+          </a>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+

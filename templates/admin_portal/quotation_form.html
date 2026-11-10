@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% block title %}Prepare Quotation for {{ order.request_id }} | AURA Admin{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card p-4 p-md-5 border-gold shadow-lg bg-white rounded-3">
+        
+        <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+          <div>
+            <span class="badge bg-gold text-dark text-uppercase fw-bold">Official Artisan Quotation</span>
+            <h3 class="serif-font fw-bold mt-1 mb-0">Prepare Design Quote</h3>
+            <small class="text-muted">For Request #{{ order.request_id }} ({{ order.full_name }} - {{ order.get_jewellery_type_display }})</small>
+          </div>
+          <a href="{% url 'admin_custom_request_detail' order.request_id %}" class="btn btn-outline-secondary btn-sm">
+            Cancel
+          </a>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
+          
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">Estimated Metal Weight (grams) *</label>
+              {{ form.estimated_weight }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">Applied Metal Rate per gram (₹) *</label>
+              {{ form.metal_rate_applied }}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">Estimated Metal Cost (₹) *</label>
+              {{ form.estimated_metal_cost }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">Artisan Craftsmanship & Making Charges (₹) *</label>
+              {{ form.making_charges }}
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label small fw-bold">Stones / Diamonds Cost (₹)</label>
+              {{ form.stone_charges }}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small fw-bold">Jewellery GST (3%) (₹)</label>
+              {{ form.gst_amount }}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small fw-bold text-dark">Total Estimated Price (₹) *</label>
+              {{ form.total_estimated_price }}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">Estimated Handcrafting Duration (Days)</label>
+              {{ form.estimated_making_days }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">Quotation Valid Until</label>
+              {{ form.valid_until }}
+            </div>
+
+            <div class="col-12">
+              <label class="form-label small fw-bold">Artisan Notes & Technical Details</label>
+              {{ form.design_notes }}
+            </div>
+
+            <div class="col-12">
+              <label class="form-label small fw-bold">Upload 3D CAD Blueprint Render / PDF</label>
+              {{ form.cad_design_file }}
+            </div>
+
+            <div class="col-12 mt-4 d-flex gap-3">
+              <button type="submit" class="btn btn-gold flex-grow-1 py-3 fw-bold">
+                <i class="bi bi-send-check-fill me-1"></i> Send Quotation to Customer
+              </button>
+              <a href="{% url 'admin_custom_request_detail' order.request_id %}" class="btn btn-outline-dark px-4 py-3">
+                Cancel
+              </a>
+            </div>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

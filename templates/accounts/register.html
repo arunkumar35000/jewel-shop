@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}Create Your Royal Account | AURA Jewellery{% endblock %}
+
+{% block content %}
+<div class="container py-5 my-3">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card p-4 p-md-5 border-gold-subtle shadow-lg bg-white rounded-3">
+        <div class="text-center mb-4">
+          <div class="fs-1 text-gold mb-2"><i class="bi bi-person-plus-fill"></i></div>
+          <h2 class="serif-font fw-bold">Join the Aura Atelier</h2>
+          <p class="text-muted small">Register to unlock personalized consultations, private previews, and express checkout.</p>
+        </div>
+
+        {% if form.errors %}
+          <div class="alert alert-danger py-2 small">
+            Please correct the errors in the fields below.
+          </div>
+        {% endif %}
+
+        <form method="POST" action="{% url 'register' %}">
+          {% csrf_token %}
+          
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">First Name *</label>
+              {{ form.first_name }}
+              {% if form.first_name.errors %}<div class="text-danger small">{{ form.first_name.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">Last Name *</label>
+              {{ form.last_name }}
+              {% if form.last_name.errors %}<div class="text-danger small">{{ form.last_name.errors.0 }}</div>{% endif %}
+            </div>
+            
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">Username *</label>
+              {{ form.username }}
+              {% if form.username.errors %}<div class="text-danger small">{{ form.username.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">Mobile Number (+91) *</label>
+              {{ form.phone }}
+              {% if form.phone.errors %}<div class="text-danger small">{{ form.phone.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div class="col-12">
+              <label class="form-label small fw-bold">Email Address *</label>
+              {{ form.email }}
+              {% if form.email.errors %}<div class="text-danger small">{{ form.email.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">Password (min 6 chars) *</label>
+              {{ form.password }}
+              {% if form.password.errors %}<div class="text-danger small">{{ form.password.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">Confirm Password *</label>
+              {{ form.confirm_password }}
+              {% if form.confirm_password.errors %}<div class="text-danger small">{{ form.confirm_password.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div class="col-12 mt-4">
+              <button type="submit" class="btn btn-gold w-100 py-3 fw-bold">
+                <i class="bi bi-shield-check me-2"></i> Register Account
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <div class="mt-4 pt-3 border-top text-center">
+          <p class="small text-muted mb-0">Already have an account? <a href="{% url 'login' %}" class="text-gold fw-bold">Sign In here</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

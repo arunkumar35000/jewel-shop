@@ -1,0 +1,81 @@
+<div class="product-card-luxury">
+  <div class="product-image-container">
+    
+    <!-- Top Badges -->
+    <div class="product-card-badges">
+      <span class="badge-purity">{{ product.purity }}</span>
+      {% if product.discount_percent > 0 %}
+        <span class="badge-discount">{{ product.discount_percent|floatformat:0 }}% OFF</span>
+      {% endif %}
+    </div>
+
+    <!-- 360° View Badge Indicator -->
+    {% if product.has_360 %}
+      <span class="badge-360-preview" title="Interactive 360° Multi-angle Rotation Available">
+        <i class="bi bi-arrow-repeat me-1 text-gold"></i> 360° Rotate
+      </span>
+    {% endif %}
+
+    <!-- Wishlist Button -->
+    <div class="card-action-btns">
+      <button class="card-wishlist-btn {% if product.id in user_wishlist_ids %}active{% endif %}" type="button" onclick="toggleWishlist({{ product.id }}, this)" title="Add to Wishlist">
+        <i class="bi {% if product.id in user_wishlist_ids %}bi-heart-fill text-danger{% else %}bi-heart{% endif %}"></i>
+      </button>
+    </div>
+
+    <!-- Product Image with Hover Flip -->
+    <a href="{{ product.get_absolute_url }}">
+      {% if product.primary_image %}
+        <img src="{{ product.primary_image.image.url }}" alt="{{ product.name }}" class="product-image-primary" loading="lazy">
+      {% endif %}
+      {% if product.secondary_image %}
+        <img src="{{ product.secondary_image.image.url }}" alt="{{ product.name }}" class="product-image-secondary" loading="lazy">
+      {% elif product.primary_image %}
+        <img src="{{ product.primary_image.image.url }}" alt="{{ product.name }}" class="product-image-secondary" loading="lazy">
+      {% endif %}
+    </a>
+  </div>
+
+  <div class="product-card-body">
+    <div class="product-category-sub">{{ product.category.name }}</div>
+    <h3 class="product-title">
+      <a href="{{ product.get_absolute_url }}">{{ product.name }}</a>
+    </h3>
+
+    <div class="product-weight-meta">
+      <span>Wt: {{ product.gross_weight }}g</span>
+      {% if product.stone_weight > 0 %}
+        <span>• Stones: {{ product.stone_weight }}g</span>
+      {% endif %}
+      <span class="text-gold float-end"><i class="bi bi-patch-check-fill"></i> BIS 916</span>
+    </div>
+
+    <div class="product-price-row mb-3">
+      <div>
+        <span class="product-price-current">₹{{ product.final_price }}</span>
+        {% if product.discount_percent > 0 %}
+          <span class="product-price-original">₹{{ product.base_price }}</span>
+        {% endif %}
+      </div>
+      <div class="small text-warning">
+        <i class="bi bi-star-fill text-gold"></i> {{ product.average_rating }}
+      </div>
+    </div>
+  </div>
+
+  <div class="product-card-footer">
+    <div class="row g-2 align-items-center">
+      <div class="col-8">
+        <button type="button" class="btn btn-card-add w-100" onclick="addToCart({{ product.id }}, 1, this)" title="Add to Bag">
+          <i class="bi bi-bag-plus"></i> <span>Add to Bag</span>
+        </button>
+      </div>
+      <div class="col-4">
+        <a href="{{ product.get_absolute_url }}" class="btn btn-card-view w-100" title="View Details">
+          View
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+

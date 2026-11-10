@@ -1,0 +1,335 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}AURA | Luxury Gold Jewellery & Diamonds{% endblock %}
+
+{% block content %}
+
+<!-- Hero Banner Slider -->
+<section class="hero-slider-section">
+  <div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000">
+    <div class="carousel-indicators">
+      {% for banner in banners %}
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="{{ forloop.counter0 }}" class="{% if forloop.first %}active{% endif %}" aria-current="{% if forloop.first %}true{% endif %}"></button>
+      {% empty %}
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
+      {% endfor %}
+    </div>
+
+    <div class="carousel-inner">
+      {% for banner in banners %}
+        <div class="carousel-item hero-slide-item {% if forloop.first %}active{% endif %}" style="background-color: #0E0E0E;">
+          <div class="container hero-content">
+            <div class="row align-items-center">
+              <div class="col-lg-8">
+                <span class="hero-badge"><i class="bi bi-stars text-gold me-1"></i> {{ banner.badge_text }}</span>
+                <h1 class="hero-title serif-font">{{ banner.title }}</h1>
+                <p class="hero-subtitle">{{ banner.subtitle }}</p>
+                <div class="d-flex flex-wrap gap-3">
+                  <a href="{{ banner.button_url }}" class="btn btn-gold btn-lg">
+                    {{ banner.button_text }} <i class="bi bi-arrow-right ms-2"></i>
+                  </a>
+                  <a href="{% url 'custom_order_create' %}" class="btn btn-dark-luxury btn-lg">
+                    <i class="bi bi-palette2 me-2 text-gold"></i> Custom Studio
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <div class="carousel-item hero-slide-item active" style="background-color: #0E0E0E;">
+          <div class="container hero-content">
+            <div class="row">
+              <div class="col-lg-8">
+                <span class="hero-badge"><i class="bi bi-stars text-gold me-1"></i> ROYAL HERITAGE 2026</span>
+                <h1 class="hero-title serif-font">The Pinnacle of 22K Hallmarked Gold Artistry</h1>
+                <p class="hero-subtitle">Handcrafted temple bridal chokers, certified solitaire diamonds, and handcrafted gold jewellery made just for you.</p>
+                <div class="d-flex gap-3">
+                  <a href="{% url 'product_list' %}" class="btn btn-gold btn-lg">Explore Collections</a>
+                  <a href="{% url 'custom_order_create' %}" class="btn btn-dark-luxury btn-lg">Custom Design</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    </button>
+  </div>
+</section>
+
+<!-- Category Highlights Carousel/Grid -->
+<section class="py-5 bg-white border-bottom">
+  <div class="container">
+    <div class="text-center mb-5">
+      <span class="text-gold text-uppercase fw-bold letter-spacing-2 small">Curated Masterpieces</span>
+      <h2 class="serif-font display-6 fw-bold mt-1">Explore By Category</h2>
+      <div class="mx-auto bg-gold" style="width: 60px; height: 2px;"></div>
+    </div>
+
+    <div class="row g-4">
+      {% for cat in categories %}
+        <div class="col-6 col-md-4 col-lg-2 text-center">
+          <a href="{{ cat.get_absolute_url }}" class="text-decoration-none group">
+            <div class="rounded-circle mx-auto p-4 mb-3 d-flex align-items-center justify-content-center shadow-sm" style="width: 100px; height: 100px; background: #FAF7F0; border: 1.5px solid var(--gold-light); transition: all 0.3s ease;">
+              <i class="bi {{ cat.icon_class|default:'bi-gem' }} fs-1 text-gold"></i>
+            </div>
+            <h6 class="fw-bold text-dark mb-1">{{ cat.name }}</h6>
+            <small class="text-muted d-block">{{ cat.products.count }} Designs</small>
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Interactive Live Gold Price Estimator Calculator -->
+<section class="py-5" style="background: #F8F5EE; border-bottom: 1px solid var(--cream-border);">
+  <div class="container">
+    <div class="row align-items-center g-4">
+      <div class="col-lg-5">
+        <span class="text-gold text-uppercase fw-bold letter-spacing-2 small">Transparent Valuation</span>
+        <h2 class="serif-font display-6 fw-bold mt-1">Live Gold Price & Making Calculator</h2>
+        <p class="text-muted small">
+          Calculate the exact transparent breakdown of pure bullion value, craftsmanship charges, and 3% Indian GST before you purchase or customize jewellery.
+        </p>
+        <div class="d-flex align-items-center gap-2 small text-muted">
+          <i class="bi bi-shield-check text-gold fs-5"></i>
+          <span>Synced with today's official Indian Bullion and Jewellers Association (IBJA) rates.</span>
+        </div>
+      </div>
+
+      <div class="col-lg-7">
+        <div class="card p-4 p-md-5 border-gold shadow-sm bg-white rounded-3">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label small fw-bold">Weight in Grams</label>
+              <input type="number" id="calcWeight" class="form-control" value="15.000" min="0.1" step="0.1" oninput="calculateGoldEstimate()">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small fw-bold">Gold Purity / Metal</label>
+              <select id="calcPurity" class="form-select" onchange="calculateGoldEstimate()">
+                <option value="7450">24K (999 Pure) - ₹7,450/g</option>
+                <option value="6830" selected>22K (916 Hallmark) - ₹6,830/g</option>
+                <option value="5590">18K (750 Hallmark) - ₹5,590/g</option>
+                <option value="4350">14K (585 Hallmark) - ₹4,350/g</option>
+                <option value="92">Sterling Silver - ₹92/g</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small fw-bold">Making Charges</label>
+              <select id="calcMaking" class="form-select" onchange="calculateGoldEstimate()">
+                <option value="8">8% (Simple Coins/Chains)</option>
+                <option value="12" selected>12% (Standard Rings/Bangles)</option>
+                <option value="15">15% (Intricate Bridal Sets)</option>
+                <option value="18">18% (Antique Temple Nakashi)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Live Result Breakdown -->
+          <div class="p-3 bg-light rounded border mt-4">
+            <div class="row g-2 text-center">
+              <div class="col-6 col-md-3 border-end">
+                <small class="text-muted d-block">Pure Metal Value</small>
+                <span class="fw-bold fs-6 text-dark" id="calcMetalVal">₹1,02,450</span>
+              </div>
+              <div class="col-6 col-md-3 border-end">
+                <small class="text-muted d-block">Making Charges</small>
+                <span class="fw-bold fs-6 text-dark" id="calcMakingVal">₹12,294</span>
+              </div>
+              <div class="col-6 col-md-3 border-end">
+                <small class="text-muted d-block">Jewellery GST (3%)</small>
+                <span class="fw-bold fs-6 text-dark" id="calcGstVal">₹3,442</span>
+              </div>
+              <div class="col-6 col-md-3">
+                <small class="text-gold-dark fw-bold d-block">Grand Estimated Total</small>
+                <span class="fw-bold fs-5 text-dark" id="calcTotalVal">₹1,18,186</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-3 text-end">
+            <a href="{% url 'custom_order_create' %}" class="btn btn-gold btn-sm px-3 py-2 fw-bold">
+              <i class="bi bi-palette2 me-1"></i> Design Custom Piece with This Estimate
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- New Arrivals Section -->
+<section class="py-5">
+  <div class="container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4">
+      <div>
+        <span class="text-gold text-uppercase fw-bold letter-spacing-2 small">Fresh From The Atelier</span>
+        <h2 class="serif-font display-6 fw-bold mt-1">New Arrivals</h2>
+      </div>
+      <a href="{% url 'product_list' %}?sort=newest" class="text-gold fw-bold text-uppercase small mt-2 mt-md-0">
+        View All New In <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+
+    <div class="row g-4">
+      {% for product in new_arrivals %}
+        <div class="col-6 col-md-4 col-lg-3">
+          {% include 'products/includes/product_card.html' with product=product %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Trending Jewellery with 360 Feature Showcase -->
+<section class="py-5 bg-white border-top border-bottom">
+  <div class="container">
+    <div class="text-center mb-5">
+      <span class="text-gold text-uppercase fw-bold letter-spacing-2 small">Customer Favorites</span>
+      <h2 class="serif-font display-6 fw-bold mt-1">Trending Jewellery Collections</h2>
+      <p class="text-muted small">Experience interactive 360-degree rotation view on selected flagship heirlooms.</p>
+      <div class="mx-auto bg-gold" style="width: 60px; height: 2px;"></div>
+    </div>
+
+    <div class="row g-4">
+      {% for product in trending_products %}
+        <div class="col-6 col-md-4 col-lg-3">
+          {% include 'products/includes/product_card.html' with product=product %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Curated Bridal Kundan & Solitaire Banners -->
+<section class="py-5">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="p-5 rounded-3 text-white position-relative overflow-hidden" style="background: linear-gradient(135deg, #1A1412 0%, #2E1A16 100%); border: 1px solid var(--gold-primary); min-height: 380px; display: flex; flex-direction: column; justify-content: center;">
+          <span class="badge bg-gold text-dark text-uppercase px-2 py-1 mb-2 fw-bold w-auto align-self-start">Royal Wedding Couture</span>
+          <h3 class="serif-font display-6 text-white mb-2">Bridal Kundan & Polki Sets</h3>
+          <p class="text-light opacity-75 mb-4">Complete royal wedding sets with uncut Polkis, Zambian emeralds, and south sea pearl chokers.</p>
+          <div>
+            <a href="{% url 'product_list_by_category' category_slug='bridal-trousseau' %}" class="btn btn-gold">
+              Explore Bridal <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="p-5 rounded-3 text-white position-relative overflow-hidden" style="background: linear-gradient(135deg, #0E1621 0%, #152233 100%); border: 1px solid var(--gold-primary); min-height: 380px; display: flex; flex-direction: column; justify-content: center;">
+          <span class="badge bg-gold text-dark text-uppercase px-2 py-1 mb-2 fw-bold w-auto align-self-start">VVS-EF Solitaires</span>
+          <h3 class="serif-font display-6 text-white mb-2">Triple Excellent Diamond Solitaires</h3>
+          <p class="text-light opacity-75 mb-4">Conflict-free certified diamonds set in 18K white, yellow, and rose gold prongs.</p>
+          <div>
+            <a href="{% url 'product_list_by_category' category_slug='diamond-solitaires' %}" class="btn btn-gold">
+              Explore Solitaires <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Best Sellers Grid -->
+<section class="py-5 bg-white border-top">
+  <div class="container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4">
+      <div>
+        <span class="text-gold text-uppercase fw-bold letter-spacing-2 small">Timeless Classics</span>
+        <h2 class="serif-font display-6 fw-bold mt-1">Best Selling Heirlooms</h2>
+      </div>
+      <a href="{% url 'product_list' %}?sort=bestseller" class="text-gold fw-bold text-uppercase small mt-2 mt-md-0">
+        View All Bestsellers <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+
+    <div class="row g-4">
+      {% for product in bestsellers %}
+        <div class="col-6 col-md-4 col-lg-3">
+          {% include 'products/includes/product_card.html' with product=product %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Customer Testimonials -->
+<section class="py-5" style="background: #FDFBF7;">
+  <div class="container">
+    <div class="text-center mb-5">
+      <span class="text-gold text-uppercase fw-bold letter-spacing-2 small">Client Experiences</span>
+      <h2 class="serif-font display-6 fw-bold mt-1">Royal Testimonials</h2>
+      <div class="mx-auto bg-gold" style="width: 60px; height: 2px;"></div>
+    </div>
+
+    <div class="row g-4">
+      {% for t in testimonials %}
+        <div class="col-md-4">
+          <div class="card h-100 p-4 border-gold-subtle shadow-sm bg-white">
+            <div class="d-flex text-warning mb-2 fs-6">
+              {% for i in "12345" %}
+                <i class="bi bi-star-fill text-gold me-1"></i>
+              {% endfor %}
+            </div>
+            <h6 class="fw-bold serif-font mb-2">"{{ t.title }}"</h6>
+            <p class="text-muted small flex-grow-1">"{{ t.review_text }}"</p>
+            <div class="border-top pt-3 mt-3 d-flex align-items-center gap-3">
+              <div class="rounded-circle bg-gold text-dark fw-bold d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                {{ t.customer_name|slice:":1" }}
+              </div>
+              <div>
+                <div class="fw-bold text-dark small">{{ t.customer_name }}</div>
+                <div class="text-muted" style="font-size: 0.72rem;">{{ t.city }} • Verified Buyer</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Newsletter Subscription -->
+<section class="py-5 bg-dark-obsidian text-white border-top border-gold">
+  <div class="container text-center">
+    <div class="row justify-content-center">
+      <div class="col-lg-7">
+        <div class="fs-1 text-gold mb-2"><i class="bi bi-envelope-paper-heart"></i></div>
+        <h3 class="serif-font display-6 fw-bold text-white mb-2">Join Aura Royal Insider</h3>
+        <p class="text-light opacity-75 small mb-4">
+          Subscribe to receive private invitations to high-jewellery showcases, daily gold market updates, and exclusive festive privileges.
+        </p>
+
+        <form action="{% url 'newsletter_subscribe' %}" method="POST" class="row g-2 justify-content-center">
+          {% csrf_token %}
+          <div class="col-sm-8">
+            <input type="email" name="email" class="form-control py-3 px-4 border-gold-subtle text-dark" placeholder="Enter your email address" required>
+          </div>
+          <div class="col-sm-4">
+            <button type="submit" class="btn btn-gold w-100 py-3 fw-bold">
+              Subscribe Now
+            </button>
+          </div>
+        </form>
+        <small class="text-muted d-block mt-3" style="font-size: 0.75rem;">
+          <i class="bi bi-lock-fill text-gold me-1"></i> We respect your privacy. No spam, ever.
+        </small>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+

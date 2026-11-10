@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} | AURA Admin{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-7 col-lg-6">
+      <div class="card p-4 p-md-5 border-gold-subtle shadow-sm bg-white rounded-3">
+        <h3 class="serif-font fw-bold mb-4">{{ title }}</h3>
+
+        <form method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label small fw-bold">Category Name *</label>
+              {{ form.name }}
+            </div>
+            <div class="col-12">
+              <label class="form-label small fw-bold">Description</label>
+              {{ form.description }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">Icon Class (Bootstrap Icons)</label>
+              {{ form.icon_class }}
+              <div class="form-text small">e.g. <code>bi-gem</code>, <code>bi-stars</code>, <code>bi-coin</code></div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">Display Order</label>
+              {{ form.display_order }}
+            </div>
+            <div class="col-12">
+              <label class="form-label small fw-bold">Banner / Cover Image</label>
+              {{ form.image }}
+            </div>
+            <div class="col-12">
+              <div class="d-flex gap-4 mt-2">
+                <div class="form-check">
+                  {{ form.is_featured }}
+                  <label class="form-check-label small" for="{{ form.is_featured.id_for_label }}">Featured on Homepage</label>
+                </div>
+                <div class="form-check">
+                  {{ form.is_active }}
+                  <label class="form-check-label small" for="{{ form.is_active.id_for_label }}">Active</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 mt-4 d-flex gap-3">
+              <button type="submit" class="btn btn-gold flex-grow-1 py-2 fw-bold">Save Category</button>
+              <a href="{% url 'admin_category_list' %}" class="btn btn-outline-dark px-4 py-2">Cancel</a>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

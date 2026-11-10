@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}My Order History | AURA Luxury Jewellery{% endblock %}
+
+{% block content %}
+<div class="py-5 bg-white border-bottom">
+  <div class="container">
+    <span class="text-gold text-uppercase fw-bold small">Customer Account</span>
+    <h1 class="serif-font display-6 fw-bold mt-1">My Jewellery Orders</h1>
+    <p class="text-muted small mb-0">{{ orders.count }} order(s) placed</p>
+  </div>
+</div>
+
+<div class="container py-5">
+  {% if orders %}
+    <div class="card border-gold-subtle shadow-sm bg-white rounded-3 overflow-hidden">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-dark small text-uppercase">
+            <tr>
+              <th>Order Number</th>
+              <th>Date Placed</th>
+              <th>Items</th>
+              <th>Payment</th>
+              <th>Status</th>
+              <th>Total Amount</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ord in orders %}
+              <tr>
+                <td class="fw-bold font-monospace">{{ ord.order_number }}</td>
+                <td class="text-muted small">{{ ord.created_at|date:"d M Y, h:i A" }}</td>
+                <td>
+                  <div class="small fw-bold">{{ ord.items.first.product_name }}</div>
+                  {% if ord.items.count > 1 %}
+                    <small class="text-muted">+{{ ord.items.count|add:"-1" }} more item(s)</small>
+                  {% endif %}
+                </td>
+                <td>
+                  <span class="badge {% if ord.payment_status == 'PAID' %}bg-success{% else %}bg-warning text-dark{% endif %}">
+                    {{ ord.get_payment_method_display }} ({{ ord.get_payment_status_display }})
+                  </span>
+                </td>
+                <td>
+                  <span class="badge bg-dark border border-gold text-gold">
+                    {{ ord.get_order_status_display }}
+                  </span>
+                </td>
+                <td class="fw-bold fs-6">₹{{ ord.grand_total }}</td>
+                <td class="text-end">
+                  <div class="btn-group btn-group-sm">
+                    <a href="{% url 'order_detail' ord.order_number %}" class="btn btn-outline-dark" title="View Order">
+                      <i class="bi bi-eye"></i> Details
+                    </a>
+                    <a href="{% url 'order_tracking' ord.order_number %}" class="btn btn-outline-gold" title="Track Order">
+                      <i class="bi bi-geo-alt"></i> Track
+                    </a>
+                    <a href="{% url 'order_invoice' ord.order_number %}" class="btn btn-outline-secondary" target="_blank" title="Invoice">
+                      <i class="bi bi-printer"></i>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% else %}
+    <div class="text-center py-5 my-5">
+      <div class="fs-1 text-gold mb-3"><i class="bi bi-box-seam"></i></div>
+      <h3 class="serif-font fw-bold">No Orders Placed Yet</h3>
+      <p class="text-muted small">Your order history is empty. Start your royal collection today.</p>
+      <a href="{% url 'product_list' %}" class="btn btn-gold mt-2">Explore Jewellery Collections</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+

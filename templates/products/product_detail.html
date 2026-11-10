@@ -1,0 +1,495 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} | AURA Luxury Jewellery{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb Navigation -->
+<div class="py-3 bg-white border-bottom">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb small text-uppercase mb-0">
+        <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-gold">Home</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'product_list' %}" class="text-muted">Collections</a></li>
+        <li class="breadcrumb-item"><a href="{{ product.category.get_absolute_url }}" class="text-muted">{{ product.category.name }}</a></li>
+        <li class="breadcrumb-item active text-truncate" aria-current="page" style="max-width: 320px;">{{ product.name }}</li>
+      </ol>
+    </nav>
+  </div>
+</div>
+
+<div class="container py-5">
+  <div class="row g-4 g-lg-5">
+    
+    <!-- LEFT COLUMN: Gallery & 360° Interactive Viewer -->
+    <div class="col-lg-6">
+      
+      <!-- Nav Tabs: Standard Gallery vs 360° Interactive Rotate -->
+      <ul class="nav nav-pills mb-3 border-bottom pb-2 gap-2" id="mediaViewerTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active rounded-pill px-4 py-2 border" id="gallery-tab" data-bs-toggle="pill" data-bs-target="#gallery-tab-pane" type="button" role="tab" aria-selected="true">
+            <i class="bi bi-images me-1 text-gold"></i> High-Res Gallery
+          </button>
+        </li>
+        {% if product.has_360 %}
+          <li class="nav-item" role="presentation">
+            <button class="nav-link rounded-pill px-4 py-2 border text-warning fw-bold" id="viewer360-tab" data-bs-toggle="pill" data-bs-target="#viewer360-tab-pane" type="button" role="tab" aria-selected="false">
+              <i class="bi bi-arrow-repeat me-1 text-gold"></i> 360° Interactive Rotate
+            </button>
+          </li>
+        {% endif %}
+      </ul>
+
+      <div class="tab-content" id="mediaViewerTabsContent">
+        
+        <!-- Tab 1: High-Res Zoomable Gallery -->
+        <div class="tab-pane fade show active" id="gallery-tab-pane" role="tabpanel" tabindex="0">
+          <div class="position-relative">
+            <!-- Main Display Area with Magnifying Lens Effect -->
+            <div id="productMainGalleryArea" class="product-gallery-main shadow-sm" title="Click to view full screen">
+              {% if product.primary_image %}
+                <img id="mainProductImage" src="{{ product.primary_image.image.url }}" alt="{{ product.name }}" class="gallery-main-img">
+              {% else %}
+                <div class="fs-1 text-muted"><i class="bi bi-gem"></i></div>
+              {% endif %}
+              <div class="position-absolute bottom-0 end-0 m-3 z-3">
+                <span class="badge bg-dark bg-opacity-75 text-light p-2 small">
+                  <i class="bi bi-zoom-in me-1"></i> Hover to Zoom • Click for Fullscreen
+                </span>
+              </div>
+            </div>
+
+            <!-- Magnifier Result Box -->
+            <div id="zoomResultLens" class="zoom-lens-result"></div>
+          </div>
+
+          <!-- Thumbnail Strip -->
+          <div class="thumbnail-strip">
+            {% for img in gallery_images %}
+              <div class="thumb-item {% if forloop.first %}active{% endif %}" data-full-src="{{ img.image.url }}">
+                <img src="{{ img.image.url }}" alt="{{ img.alt_text|default:product.name }}">
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Tab 2: 360° Interactive Multi-angle Rotation Viewer -->
+        {% if product.has_360 %}
+          <div class="tab-pane fade" id="viewer360-tab-pane" role="tabpanel" tabindex="0">
+            <div id="jewellery360Viewer" class="viewer-360-wrapper" data-frames='{{ frames_360_json|safe }}'>
+              
+              <!-- Canvas Area for Drag / Touch Rotation -->
+              <div class="viewer-360-canvas-area">
+                <div class="viewer-360-overlay-hint">
+                  <i class="bi bi-hand-index-thumb text-gold fs-6"></i>
+                  <span>Drag or Swipe horizontally to rotate in 360°</span>
+                </div>
+                <img src="{{ frames_360.0 }}" alt="{{ product.name }} 360 frame" class="viewer-360-image">
+              </div>
+
+              <!-- Interactive Controls Bar -->
+              <div class="viewer-360-controls-bar">
+                <div class="d-flex align-items-center gap-2">
+                  <button type="button" class="viewer-control-btn btn-360-play" title="Play / Pause Rotation">
+                    <i class="bi bi-play-fill"></i>
+                  </button>
+                  <button type="button" class="viewer-control-btn btn-360-reset" title="Reset View">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                  </button>
+                  <button type="button" class="viewer-control-btn btn-360-zoom-in" title="Zoom In (+)">
+                    <i class="bi bi-zoom-in"></i>
+                  </button>
+                  <button type="button" class="viewer-control-btn btn-360-zoom-out" title="Zoom Out (-)">
+                    <i class="bi bi-zoom-out"></i>
+                  </button>
+                </div>
+
+                <!-- Frame Scrubber Range Slider -->
+                <input type="range" class="viewer-scrubber-slider" min="0" max="{{ product.count_360_frames|add:'-1' }}" value="0">
+
+                <div class="d-flex align-items-center gap-3">
+                  <div class="viewer-frame-display">0° (1/{{ product.count_360_frames }})</div>
+                  <button type="button" class="viewer-control-btn btn-360-fullscreen" title="Toggle Fullscreen">
+                    <i class="bi bi-fullscreen"></i>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        {% endif %}
+
+      </div>
+
+      <!-- BIS Hallmark & Purity Assurance Banner -->
+      <div class="card p-3 mt-4 border-gold-subtle shadow-sm bg-white">
+        <div class="d-flex align-items-center gap-3">
+          <i class="bi bi-patch-check-fill fs-1 text-gold"></i>
+          <div>
+            <div class="fw-bold small text-dark">BIS 916 Hallmark & HUID Verified</div>
+            <div class="text-muted small">Certificate: <strong>{{ product.certificate_number }}</strong> • 100% pure authentic precious metal guarantee.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT COLUMN: Product Details, Pricing, Transparency & Actions -->
+    <div class="col-lg-6">
+      
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="text-gold text-uppercase fw-bold small letter-spacing-2">{{ product.category.name }}</span>
+        <span class="badge bg-light text-dark border">SKU: {{ product.sku }}</span>
+      </div>
+
+      <h1 class="serif-font display-6 fw-bold text-dark mb-2">{{ product.name }}</h1>
+
+      <!-- Rating & Stock Badge -->
+      <div class="d-flex align-items-center gap-3 mb-3">
+        <div class="text-warning small">
+          {% for i in "12345" %}
+            <i class="bi bi-star-fill text-gold"></i>
+          {% endfor %}
+          <span class="text-dark fw-bold ms-1">{{ product.average_rating }}</span>
+          <span class="text-muted">({{ product.review_count }} Reviews)</span>
+        </div>
+        <span>•</span>
+        <div>
+          {% if product.stock > 0 %}
+            <span class="badge bg-success bg-opacity-10 text-success border border-success"><i class="bi bi-check-circle me-1"></i> In Stock ({{ product.stock }} units)</span>
+          {% else %}
+            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger">Made to Order</span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Price Block -->
+      <div class="p-3 rounded-2 bg-white border border-gold-subtle shadow-sm mb-4">
+        <div class="d-flex align-items-baseline gap-2">
+          <span class="display-6 fw-bold text-dark">₹{{ product.final_price }}</span>
+          {% if product.discount_percent > 0 %}
+            <span class="fs-5 text-muted text-decoration-line-through">₹{{ product.base_price }}</span>
+            <span class="badge bg-danger ms-2">{{ product.discount_percent|floatformat:0 }}% OFF</span>
+          {% endif %}
+        </div>
+        <small class="text-muted d-block mt-1">
+          Price includes making charges & transit insurance. 3% GST calculated at checkout.
+        </small>
+      </div>
+
+      <!-- Description -->
+      <p class="text-muted small mb-4">{{ product.description }}</p>
+
+      <!-- Key Specifications Table -->
+      <div class="mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h6 class="heading-font fw-bold small text-uppercase text-gold-dark mb-0"><i class="bi bi-list-check me-1"></i> Product Specifications</h6>
+          <button type="button" class="btn btn-link text-gold small text-decoration-none p-0 fw-bold" data-bs-toggle="modal" data-bs-target="#sizingGuideModal">
+            <i class="bi bi-rulers me-1"></i> Sizing Guide Chart
+          </button>
+        </div>
+        <table class="table-luxury-specs shadow-sm rounded border">
+          <tr>
+            <td>Precious Metal:</td>
+            <td class="fw-bold">{{ product.get_metal_type_display }}</td>
+          </tr>
+          <tr>
+            <td>Purity / Karat:</td>
+            <td class="fw-bold text-gold-dark">{{ product.get_purity_display }}</td>
+          </tr>
+          <tr>
+            <td>Gross Weight:</td>
+            <td><strong>{{ product.gross_weight }}</strong> Grams</td>
+          </tr>
+          <tr>
+            <td>Net Gold Weight:</td>
+            <td><strong>{{ product.net_weight }}</strong> Grams</td>
+          </tr>
+          {% if product.stone_weight > 0 %}
+            <tr>
+              <td>Gemstone / Diamond:</td>
+              <td>{{ product.stone_weight }} Carats / Grams</td>
+            </tr>
+          {% endif %}
+          <tr>
+            <td>Gender / Fit:</td>
+            <td>{{ product.get_gender_display }}</td>
+          </tr>
+          {% if product.specifications %}
+            <tr>
+              <td>Design Details:</td>
+              <td class="small">{{ product.specifications }}</td>
+            </tr>
+          {% endif %}
+        </table>
+      </div>
+
+      <!-- Price Breakdown Transparency Accordion -->
+      <div class="accordion mb-4" id="priceBreakdownAccordion">
+        <div class="accordion-item border-gold-subtle">
+          <h2 class="accordion-header" id="headingBreakdown">
+            <button class="accordion-button collapsed py-2 text-dark fw-bold small" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBreakdown" aria-expanded="false" aria-controls="collapseBreakdown">
+              <i class="bi bi-calculator me-2 text-gold"></i> View Transparent Price & Tax Breakdown
+            </button>
+          </h2>
+          <div id="collapseBreakdown" class="accordion-collapse collapse" aria-labelledby="headingBreakdown" data-bs-parent="#priceBreakdownAccordion">
+            <div class="accordion-body small bg-light">
+              <div class="d-flex justify-content-between py-1 border-bottom">
+                <span>Gold Rate ({{ product.purity }}):</span>
+                <span>₹{{ purity_rate }}/g</span>
+              </div>
+              <div class="d-flex justify-content-between py-1 border-bottom">
+                <span>Pure Metal Value ({{ product.net_weight }}g × ₹{{ purity_rate }}):</span>
+                <span class="fw-bold">₹{{ calculated_gold_value }}</span>
+              </div>
+              <div class="d-flex justify-content-between py-1 border-bottom">
+                <span>Craftsmanship & Making Charges:</span>
+                <span>₹{{ product.making_charges }}</span>
+              </div>
+              <div class="d-flex justify-content-between py-1 border-bottom">
+                <span>Jewellery GST (3%):</span>
+                <span>₹{{ estimated_gst }}</span>
+              </div>
+              <div class="d-flex justify-content-between py-2 fw-bold text-dark fs-6">
+                <span>Estimated All-Inclusive Total:</span>
+                <span class="text-gold-dark">₹{{ grand_total_estimate }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pincode Delivery Estimator -->
+      <div class="mb-4">
+        <label class="form-label small fw-bold text-uppercase"><i class="bi bi-truck text-gold me-1"></i> Delivery & Availability Check</label>
+        <div class="input-group" style="max-width: 380px;">
+          <input type="text" id="pincodeInput" class="form-control form-control-sm" placeholder="Enter 6-digit PIN Code" maxlength="6">
+          <button class="btn btn-outline-dark btn-sm" type="button" onclick="checkPincode()">Check PIN</button>
+        </div>
+        <div id="pincodeResult"></div>
+      </div>
+
+      <!-- Action Buttons: Quantity, Add to Cart, Buy Now, Wishlist -->
+      <div class="card p-3 border-gold-subtle bg-white shadow-sm mb-4">
+        <div class="row g-2 align-items-center">
+          <div class="col-sm-3">
+            <label class="form-label small fw-bold mb-1">Quantity</label>
+            <div class="input-group input-group-sm">
+              <button class="btn btn-outline-secondary" type="button" onclick="const q = document.getElementById('productQty'); if(q.value > 1) q.value--;">-</button>
+              <input type="number" id="productQty" class="form-control text-center" value="1" min="1" max="{{ product.stock }}">
+              <button class="btn btn-outline-secondary" type="button" onclick="const q = document.getElementById('productQty'); q.value++;">+</button>
+            </div>
+          </div>
+
+          <div class="col-sm-5">
+            <label class="form-label small d-none d-sm-block">&nbsp;</label>
+            <button type="button" class="btn btn-gold w-100 py-2 fw-bold" onclick="addToCart({{ product.id }}, document.getElementById('productQty').value, this)">
+              <i class="bi bi-bag-plus me-1"></i> Add to Bag
+            </button>
+          </div>
+
+          <div class="col-sm-4">
+            <label class="form-label small d-none d-sm-block">&nbsp;</label>
+            <button type="button" class="btn btn-dark-luxury w-100 py-2 fw-bold" onclick="addToCart({{ product.id }}, document.getElementById('productQty').value); setTimeout(() => window.location.href='{% url 'checkout' %}', 500);">
+              Buy Now
+            </button>
+          </div>
+        </div>
+
+        <div class="mt-3 pt-2 border-top d-flex justify-content-between align-items-center">
+          <button type="button" class="btn btn-link text-decoration-none p-0 text-dark small" onclick="toggleWishlist({{ product.id }}, this)">
+            <i class="bi {% if in_wishlist %}bi-heart-fill text-danger{% else %}bi-heart text-gold{% endif %} me-1"></i>
+            <span>{% if in_wishlist %}Saved in Wishlist{% else %}Add to Wishlist{% endif %}</span>
+          </button>
+          <a href="{% url 'custom_order_create' %}" class="small text-gold fw-bold text-decoration-none">
+            <i class="bi bi-palette2 me-1"></i> Request Custom Version
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- CUSTOMER REVIEWS SECTION -->
+  <div class="row mt-5 pt-4 border-top">
+    <div class="col-lg-8">
+      <h3 class="serif-font fw-bold mb-4">Customer Reviews ({{ reviews.count }})</h3>
+      
+      {% for rev in reviews %}
+        <div class="card p-3 mb-3 border shadow-sm">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <div class="fw-bold">{{ rev.title }}</div>
+            <div class="text-warning small">
+              {% for i in "12345" %}
+                <i class="bi bi-star-fill text-gold"></i>
+              {% endfor %}
+            </div>
+          </div>
+          <p class="text-muted small mb-2">{{ rev.comment }}</p>
+          <div class="text-muted" style="font-size: 0.72rem;">
+            By <strong>{{ rev.user.first_name|default:rev.user.username }}</strong> on {{ rev.created_at|date:"d M Y" }} • 
+            <span class="text-success"><i class="bi bi-patch-check"></i> Verified Purchase</span>
+          </div>
+        </div>
+      {% empty %}
+        <p class="text-muted small">No reviews yet. Be the first royal patron to review this masterpiece.</p>
+      {% endfor %}
+    </div>
+
+    <!-- Submit Review Form Column -->
+    <div class="col-lg-4">
+      <div class="card p-4 border-gold-subtle shadow-sm bg-white rounded-3">
+        <h5 class="serif-font fw-bold mb-2">Write a Review</h5>
+        <p class="text-muted small mb-3">Share your experience with this jewellery piece.</p>
+
+        {% if user.is_authenticated %}
+          <form method="POST">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label class="form-label small fw-bold">Overall Rating</label>
+              {{ review_form.rating }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-bold">Review Headline</label>
+              {{ review_form.title }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-bold">Detailed Review</label>
+              {{ review_form.comment }}
+            </div>
+            <button type="submit" class="btn btn-gold btn-sm w-100 py-2">Submit Review</button>
+          </form>
+        {% else %}
+          <div class="p-3 bg-light rounded text-center small">
+            Please <a href="{% url 'login' %}?next={{ request.path }}" class="text-gold fw-bold">Sign In</a> to write a review.
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- RELATED PRODUCTS -->
+  {% if related_products %}
+    <div class="mt-5 pt-4 border-top">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="serif-font fw-bold mb-0">Complementary Creations</h3>
+        <a href="{{ product.category.get_absolute_url }}" class="text-gold small fw-bold text-uppercase">View Category <i class="bi bi-arrow-right"></i></a>
+      </div>
+      <div class="row g-4">
+        {% for rel in related_products %}
+          <div class="col-6 col-md-3">
+            {% include 'products/includes/product_card.html' with product=rel %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Sizing Guide Interactive Modal -->
+  <div class="modal fade" id="sizingGuideModal" tabindex="-1" aria-labelledby="sizingGuideModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content border-gold">
+        <div class="modal-header bg-dark-obsidian text-light border-bottom border-gold-subtle">
+          <h5 class="modal-title serif-font text-gold d-flex align-items-center gap-2" id="sizingGuideModalLabel">
+            <i class="bi bi-rulers"></i> Royal Jewellery Sizing Guide Chart
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <!-- Nav tabs -->
+          <ul class="nav nav-pills mb-3 border-bottom pb-2" id="sizeGuideTabs" role="tablist">
+            <li class="nav-item">
+              <button class="nav-link active rounded-pill px-3 py-1 border small" id="ring-size-tab" data-bs-toggle="pill" data-bs-target="#ring-size-pane" type="button" role="tab">Ring Size Guide</button>
+            </li>
+            <li class="nav-item ms-2">
+              <button class="nav-link rounded-pill px-3 py-1 border small" id="bangle-size-tab" data-bs-toggle="pill" data-bs-target="#bangle-size-pane" type="button" role="tab">Bangle & Kada Size Guide</button>
+            </li>
+            <li class="nav-item ms-2">
+              <button class="nav-link rounded-pill px-3 py-1 border small" id="necklace-length-tab" data-bs-toggle="pill" data-bs-target="#necklace-length-pane" type="button" role="tab">Necklace Lengths</button>
+            </li>
+          </ul>
+
+          <div class="tab-content" id="sizeGuideTabsContent">
+            <!-- Ring Sizes -->
+            <div class="tab-pane fade show active" id="ring-size-pane" role="tabpanel">
+              <div class="table-responsive">
+                <table class="table table-bordered table-sm small text-center align-middle">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Indian / Asian Size</th>
+                      <th>US Size</th>
+                      <th>UK / British Size</th>
+                      <th>Inner Diameter (mm)</th>
+                      <th>Circumference (mm)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td><strong>10</strong></td><td>5.25</td><td>K</td><td>15.9 mm</td><td>50.0 mm</td></tr>
+                    <tr><td><strong>12</strong></td><td>6.00</td><td>L 1/2</td><td>16.5 mm</td><td>51.9 mm</td></tr>
+                    <tr class="table-warning"><td><strong>14 (Standard Women)</strong></td><td>6.75</td><td>N</td><td>17.2 mm</td><td>54.0 mm</td></tr>
+                    <tr><td><strong>16</strong></td><td>7.50</td><td>P</td><td>17.8 mm</td><td>56.0 mm</td></tr>
+                    <tr><td><strong>18</strong></td><td>8.25</td><td>Q 1/2</td><td>18.5 mm</td><td>58.1 mm</td></tr>
+                    <tr class="table-info"><td><strong>20 (Standard Men)</strong></td><td>9.25</td><td>S</td><td>19.1 mm</td><td>60.0 mm</td></tr>
+                    <tr><td><strong>22</strong></td><td>10.00</td><td>T 1/2</td><td>19.8 mm</td><td>62.2 mm</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Bangle Sizes -->
+            <div class="tab-pane fade" id="bangle-size-pane" role="tabpanel">
+              <div class="table-responsive">
+                <table class="table table-bordered table-sm small text-center align-middle">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Bangle Size Notation</th>
+                      <th>Inner Diameter (Inches)</th>
+                      <th>Inner Diameter (mm)</th>
+                      <th>Fit Type</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td><strong>2-2</strong></td><td>2.125 inches</td><td>54.0 mm</td><td>Petite / Small Wrist</td></tr>
+                    <tr class="table-warning"><td><strong>2-4 (Most Common)</strong></td><td>2.250 inches</td><td>57.2 mm</td><td>Standard Medium</td></tr>
+                    <tr><td><strong>2-6</strong></td><td>2.375 inches</td><td>60.3 mm</td><td>Medium-Large</td></tr>
+                    <tr><td><strong>2-8</strong></td><td>2.500 inches</td><td>63.5 mm</td><td>Large / Broad Kada</td></tr>
+                    <tr><td><strong>2-10</strong></td><td>2.625 inches</td><td>66.7 mm</td><td>Extra Large</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Necklace Lengths -->
+            <div class="tab-pane fade" id="necklace-length-pane" role="tabpanel">
+              <div class="table-responsive">
+                <table class="table table-bordered table-sm small align-middle">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Style Name</th>
+                      <th>Length (Inches)</th>
+                      <th>Position on Body</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td><strong>Royal Choker</strong></td><td>14 - 16 inches</td><td>Snug around the base of the throat</td></tr>
+                    <tr><td><strong>Princess Necklace</strong></td><td>18 inches</td><td>Rests gracefully on the collarbone</td></tr>
+                    <tr><td><strong>Matinee Haram</strong></td><td>20 - 24 inches</td><td>Rests between collarbone and center bust</td></tr>
+                    <tr><td><strong>Grand Temple Opera Haram</strong></td><td>28 - 32 inches</td><td>Falls elegantly near the navel, regal bridal wear</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-3 bg-light rounded border mt-3 small text-muted">
+            <i class="bi bi-info-circle text-gold me-1"></i> Complimentary resizing is available on all Aura rings and bangles within 30 days of purchase.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+

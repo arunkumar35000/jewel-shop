@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% block title %}My Profile | AURA Luxury Jewellery{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row g-4">
+    
+    <!-- Profile Sidebar -->
+    <div class="col-lg-4">
+      <div class="card p-4 border-gold-subtle shadow-sm bg-white text-center rounded-3 mb-4">
+        <div class="position-relative mx-auto mb-3" style="width: 100px; height: 100px;">
+          {% if profile.avatar %}
+            <img src="{{ profile.avatar.url }}" alt="{{ user.get_full_name }}" class="rounded-circle w-100 h-100 object-fit-cover border border-2 border-gold">
+          {% else %}
+            <div class="rounded-circle w-100 h-100 bg-dark-obsidian text-gold d-flex align-items-center justify-content-center fs-1 border border-2 border-gold">
+              {{ user.first_name|default:user.username|slice:":1"|upper }}
+            </div>
+          {% endif %}
+        </div>
+        <h4 class="serif-font fw-bold mb-1">{{ user.get_full_name|default:user.username }}</h4>
+        <p class="text-muted small mb-2">{{ user.email }}</p>
+        <div>
+          <span class="badge bg-dark border border-gold text-gold px-3 py-1">
+            <i class="bi bi-award-fill me-1"></i> {{ profile.loyalty_points }} Royal Loyalty Points
+          </span>
+        </div>
+      </div>
+
+      <!-- Quick Links Navigation Card -->
+      <div class="list-group border-gold-subtle shadow-sm rounded-3 overflow-hidden">
+        <a href="{% url 'customer_profile' %}" class="list-group-item list-group-item-action active py-3 bg-dark-obsidian border-gold text-gold">
+          <i class="bi bi-person me-2"></i> Personal Profile
+        </a>
+        <a href="{% url 'address_list' %}" class="list-group-item list-group-item-action py-3">
+          <i class="bi bi-geo-alt me-2 text-gold"></i> Saved Addresses ({{ user.addresses.count }})
+        </a>
+        <a href="{% url 'order_history' %}" class="list-group-item list-group-item-action py-3">
+          <i class="bi bi-box-seam me-2 text-gold"></i> Order History & Tracking
+        </a>
+        <a href="{% url 'customer_custom_orders' %}" class="list-group-item list-group-item-action py-3">
+          <i class="bi bi-gem me-2 text-gold"></i> Custom Design Requests ({{ user.custom_orders.count }})
+        </a>
+        <a href="{% url 'wishlist_view' %}" class="list-group-item list-group-item-action py-3">
+          <i class="bi bi-heart me-2 text-danger"></i> My Wishlist
+        </a>
+        <a href="{% url 'change_password' %}" class="list-group-item list-group-item-action py-3">
+          <i class="bi bi-key me-2 text-gold"></i> Change Password
+        </a>
+        {% if user.is_staff %}
+          <a href="{% url 'admin_dashboard' %}" class="list-group-item list-group-item-action py-3 text-warning fw-bold">
+            <i class="bi bi-speedometer2 me-2"></i> Admin Portal
+          </a>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Main Profile Content Area -->
+    <div class="col-lg-8">
+      
+      <!-- Edit Profile Details Card -->
+      <div class="card p-4 p-md-5 border-gold-subtle shadow-sm bg-white rounded-3 mb-4">
+        <h3 class="serif-font fw-bold mb-4">Personal Details</h3>
+
+        <form method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">First Name</label>
+              <input type="text" name="first_name" class="form-control" value="{{ user.first_name }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">Last Name</label>
+              <input type="text" name="last_name" class="form-control" value="{{ user.last_name }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">Email Address (Read-only)</label>
+              <input type="email" class="form-control bg-light" value="{{ user.email }}" readonly>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">Mobile Phone (+91)</label>
+              {{ form.phone }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">Date of Birth</label>
+              {{ form.date_of_birth }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">Profile Photo / Avatar</label>
+              {{ form.avatar }}
+            </div>
+            <div class="col-12 mt-4">
+              <button type="submit" class="btn btn-gold px-4 py-2 fw-bold">
+                <i class="bi bi-check2-circle me-1"></i> Save Changes
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Default Address Summary -->
+      <div class="card p-4 border-gold-subtle shadow-sm bg-white rounded-3 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="serif-font fw-bold mb-0">Default Delivery Address</h4>
+          <a href="{% url 'address_list' %}" class="btn btn-outline-dark btn-sm">Manage Addresses</a>
+        </div>
+        {% if default_address %}
+          <div class="p-3 bg-light rounded border">
+            <div class="fw-bold">{{ default_address.full_name }} <span class="badge bg-gold text-dark ms-2">Default</span></div>
+            <div class="text-muted small mt-1">{{ default_address.single_line_address }}</div>
+            <div class="text-muted small mt-1"><i class="bi bi-telephone me-1"></i> {{ default_address.phone }}</div>
+          </div>
+        {% else %}
+          <p class="text-muted small mb-2">No default address saved yet.</p>
+          <a href="{% url 'address_create' %}" class="btn btn-gold btn-sm w-auto align-self-start">Add Delivery Address</a>
+        {% endif %}
+      </div>
+
+      <!-- Recent Orders Teaser -->
+      <div class="card p-4 border-gold-subtle shadow-sm bg-white rounded-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="serif-font fw-bold mb-0">Recent Jewellery Orders</h4>
+          <a href="{% url 'order_history' %}" class="btn btn-outline-dark btn-sm">View All Orders</a>
+        </div>
+
+        {% if recent_orders %}
+          <div class="table-responsive">
+            <table class="table table-hover align-middle small mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Order #</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                  <th>Amount</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for ord in recent_orders %}
+                  <tr>
+                    <td class="fw-bold">{{ ord.order_number }}</td>
+                    <td class="text-muted">{{ ord.created_at|date:"d M Y" }}</td>
+                    <td>
+                      <span class="badge bg-dark border border-gold text-gold">{{ ord.get_order_status_display }}</span>
+                    </td>
+                    <td class="fw-bold">₹{{ ord.grand_total }}</td>
+                    <td>
+                      <a href="{% url 'order_detail' ord.order_number %}" class="btn btn-outline-gold btn-sm py-1 px-2">Details</a>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="text-muted small mb-0">You have not placed any orders yet. <a href="{% url 'product_list' %}" class="text-gold fw-bold">Explore our catalog</a></p>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+

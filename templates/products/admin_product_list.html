@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% block title %}Manage Products | AURA Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 px-lg-5">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+    <div>
+      <span class="badge bg-gold text-dark text-uppercase fw-bold">Admin Inventory Catalog</span>
+      <h2 class="serif-font fw-bold mt-1">Product Management</h2>
+    </div>
+    <div class="d-flex gap-2 mt-3 mt-md-0">
+      <a href="{% url 'admin_product_create' %}" class="btn btn-gold">
+        <i class="bi bi-plus-circle me-1"></i> Add New Product
+      </a>
+      <a href="{% url 'admin_category_list' %}" class="btn btn-outline-dark">
+        <i class="bi bi-tags me-1"></i> Manage Categories
+      </a>
+      <a href="{% url 'admin_dashboard' %}" class="btn btn-dark-luxury">
+        <i class="bi bi-speedometer2 me-1"></i> Dashboard
+      </a>
+    </div>
+  </div>
+
+  <!-- Search & Filter Bar -->
+  <div class="card p-3 mb-4 border-gold-subtle shadow-sm bg-white">
+    <form method="GET" class="row g-2 align-items-center">
+      <div class="col-md-5">
+        <div class="input-group input-group-sm">
+          <input type="text" name="q" class="form-control" placeholder="Search by name, SKU or code..." value="{{ q }}">
+          <button class="btn btn-gold" type="submit"><i class="bi bi-search"></i></button>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <select name="category" class="form-select form-select-sm" onchange="this.form.submit()">
+          <option value="">All Categories</option>
+          {% for cat in categories %}
+            <option value="{{ cat.id }}" {% if selected_cat == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3 text-end">
+        <a href="{% url 'admin_product_list' %}" class="btn btn-outline-secondary btn-sm">Reset</a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Products Table -->
+  <div class="card border-gold-subtle shadow-sm bg-white overflow-hidden">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-dark">
+          <tr class="small text-uppercase">
+            <th>Image</th>
+            <th>SKU & Name</th>
+            <th>Category</th>
+            <th>Metal / Purity</th>
+            <th>Gross / Net Wt</th>
+            <th>Selling Price</th>
+            <th>Stock</th>
+            <th>360° Frames</th>
+            <th>Status</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in products %}
+            <tr>
+              <td>
+                {% if p.primary_image %}
+                  <img src="{{ p.primary_image.image.url }}" alt="{{ p.name }}" style="width: 50px; height: 50px; object-fit: cover;" class="rounded border">
+                {% else %}
+                  <div style="width: 50px; height: 50px;" class="bg-light rounded border d-flex align-items-center justify-content-center text-muted"><i class="bi bi-gem"></i></div>
+                {% endif %}
+              </td>
+              <td>
+                <div class="fw-bold">{{ p.name }}</div>
+                <small class="text-muted font-monospace">{{ p.sku }}</small>
+              </td>
+              <td><span class="badge bg-light text-dark border">{{ p.category.name }}</span></td>
+              <td>
+                <span class="fw-bold text-dark">{{ p.get_metal_type_display }}</span>
+                <span class="badge bg-gold text-dark ms-1">{{ p.purity }}</span>
+              </td>
+              <td class="small">
+                <div>G: <strong>{{ p.gross_weight }}</strong>g</div>
+                <div class="text-muted">N: {{ p.net_weight }}g</div>
+              </td>
+              <td>
+                <div class="fw-bold">₹{{ p.final_price }}</div>
+                {% if p.discount_percent > 0 %}
+                  <small class="text-danger">{{ p.discount_percent|floatformat:0 }}% off</small>
+                {% endif %}
+              </td>
+              <td>
+                {% if p.stock > 0 %}
+                  <span class="badge bg-success">{{ p.stock }} units</span>
+                {% else %}
+                  <span class="badge bg-danger">Out of Stock</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if p.has_360 %}
+                  <a href="{% url 'admin_360_upload' p.pk %}" class="badge bg-dark border border-gold text-gold text-decoration-none">
+                    <i class="bi bi-arrow-repeat me-1"></i> {{ p.count_360_frames }} frames
+                  </a>
+                {% else %}
+                  <a href="{% url 'admin_360_upload' p.pk %}" class="badge bg-light text-muted border text-decoration-none">
+                    <i class="bi bi-plus-circle me-1"></i> Add 360°
+                  </a>
+                {% endif %}
+              </td>
+              <td>
+                <span class="badge {% if p.status == 'ACTIVE' %}bg-success{% elif p.status == 'DRAFT' %}bg-secondary{% else %}bg-danger{% endif %}">
+                  {{ p.get_status_display }}
+                </span>
+              </td>
+              <td class="text-end">
+                <div class="btn-group btn-group-sm">
+                  <a href="{% url 'product_detail' p.slug %}" class="btn btn-outline-secondary" title="View Storefront" target="_blank"><i class="bi bi-eye"></i></a>
+                  <a href="{% url 'admin_360_upload' p.pk %}" class="btn btn-outline-warning text-dark" title="Manage 360 Frames"><i class="bi bi-arrow-repeat"></i></a>
+                  <a href="{% url 'admin_product_edit' p.pk %}" class="btn btn-outline-dark" title="Edit"><i class="bi bi-pencil"></i></a>
+                  <a href="{% url 'admin_product_delete' p.pk %}" class="btn btn-outline-danger" title="Delete"><i class="bi bi-trash"></i></a>
+                </div>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="10" class="text-center py-5 text-muted">No products found.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if products.has_other_pages %}
+      <div class="p-3 border-top d-flex justify-content-center">
+        <ul class="pagination pagination-sm mb-0">
+          {% if products.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ products.previous_page_number }}{% if q %}&q={{ q }}{% endif %}">&laquo;</a></li>
+          {% endif %}
+          {% for p in products.paginator.page_range %}
+            <li class="page-item {% if products.number == p %}active{% endif %}">
+              <a class="page-link" href="?page={{ p }}{% if q %}&q={{ q }}{% endif %}">{{ p }}</a>
+            </li>
+          {% endfor %}
+          {% if products.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ products.next_page_number }}{% if q %}&q={{ q }}{% endif %}">&raquo;</a></li>
+          {% endif %}
+        </ul>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}Saved Addresses | AURA Jewellery{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <span class="text-gold text-uppercase fw-bold small">Customer Book</span>
+      <h2 class="serif-font fw-bold mt-1">Saved Addresses</h2>
+    </div>
+    <a href="{% url 'address_create' %}" class="btn btn-gold">
+      <i class="bi bi-plus-lg me-1"></i> Add New Address
+    </a>
+  </div>
+
+  <div class="row g-4">
+    {% for addr in addresses %}
+      <div class="col-md-6 col-lg-4">
+        <div class="card h-100 p-4 border-gold-subtle shadow-sm bg-white position-relative">
+          {% if addr.is_default %}
+            <span class="position-absolute top-0 end-0 m-3 badge bg-gold text-dark">Default</span>
+          {% endif %}
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <i class="bi bi-geo-alt-fill text-gold fs-5"></i>
+            <h5 class="serif-font fw-bold mb-0">{{ addr.full_name }}</h5>
+          </div>
+          <span class="badge bg-light text-dark border w-auto align-self-start mb-3">{{ addr.get_address_type_display }}</span>
+          
+          <p class="text-muted small flex-grow-1">
+            {{ addr.street_address }}<br>
+            {% if addr.landmark %}Near {{ addr.landmark }}<br>{% endif %}
+            {{ addr.city }}, {{ addr.state }} - {{ addr.pincode }}<br>
+            {{ addr.country }}<br>
+            <strong>Phone:</strong> {{ addr.phone }}
+          </p>
+
+          <div class="border-top pt-3 mt-2 d-flex gap-2">
+            <a href="{% url 'address_edit' addr.id %}" class="btn btn-outline-dark btn-sm flex-grow-1">
+              <i class="bi bi-pencil me-1"></i> Edit
+            </a>
+            <form action="{% url 'address_delete' addr.id %}" method="POST" onsubmit="return confirm('Are you sure you want to remove this address?');">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-outline-danger btn-sm">
+                <i class="bi bi-trash"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="col-12 text-center py-5">
+        <div class="fs-1 text-gold mb-3"><i class="bi bi-geo-alt"></i></div>
+        <h4>No Addresses Saved</h4>
+        <p class="text-muted small">Add your shipping and billing addresses for fast and insured checkout.</p>
+        <a href="{% url 'address_create' %}" class="btn btn-gold mt-2">Add Your First Address</a>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
+

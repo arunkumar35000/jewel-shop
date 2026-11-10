@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% block title %}Shopping Bag | AURA Luxury Jewellery{% endblock %}
+
+{% block content %}
+<div class="py-5 bg-white border-bottom">
+  <div class="container">
+    <span class="text-gold text-uppercase fw-bold small">Your Curated Collection</span>
+    <h1 class="serif-font display-6 fw-bold mt-1">Shopping Bag</h1>
+    <p class="text-muted small mb-0">{{ cart.total_items }} items in your bag</p>
+  </div>
+</div>
+
+<div class="container py-5">
+  {% if cart.items.exists %}
+    <div class="row g-4 g-lg-5">
+      
+      <!-- Cart Items List Column -->
+      <div class="col-lg-8">
+        <div class="card border-gold-subtle shadow-sm bg-white rounded-3 overflow-hidden">
+          <div class="table-responsive">
+            <table class="table align-middle mb-0">
+              <thead class="table-light small text-uppercase">
+                <tr>
+                  <th style="min-width: 280px;">Jewellery Piece</th>
+                  <th>Unit Price</th>
+                  <th>Quantity</th>
+                  <th>Subtotal</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in cart.items.all %}
+                  <tr>
+                    <td>
+                      <div class="d-flex align-items-center gap-3">
+                        {% if item.product.primary_image %}
+                          <img src="{{ item.product.primary_image.image.url }}" alt="{{ item.product.name }}" class="rounded border" style="width: 75px; height: 75px; object-fit: cover;">
+                        {% else %}
+                          <div class="rounded border bg-light d-flex align-items-center justify-content-center text-muted" style="width: 75px; height: 75px;"><i class="bi bi-gem"></i></div>
+                        {% endif %}
+                        <div>
+                          <a href="{{ item.product.get_absolute_url }}" class="fw-bold text-dark text-decoration-none d-block">{{ item.product.name }}</a>
+                          <div class="text-muted small mt-1">
+                            <span class="badge bg-light text-dark border">{{ item.product.purity }}</span>
+                            <span>• SKU: {{ item.product.sku }}</span>
+                            <span>• {{ item.product.gross_weight }}g</span>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="fw-bold">₹{{ item.product.final_price }}</div>
+                      {% if item.product.discount_percent > 0 %}
+                        <small class="text-muted text-decoration-line-through">₹{{ item.product.base_price }}</small>
+                      {% endif %}
+                    </td>
+                    <td>
+                      <form action="{% url 'cart_update' item.id %}" method="POST" class="d-flex align-items-center" style="max-width: 120px;">
+                        {% csrf_token %}
+                        <button type="submit" name="action" value="decrease" class="btn btn-outline-secondary btn-sm px-2 py-1">-</button>
+                        <input type="text" class="form-control form-control-sm text-center mx-1 bg-light" value="{{ item.quantity }}" readonly style="width: 45px;">
+                        <button type="submit" name="action" value="increase" class="btn btn-outline-secondary btn-sm px-2 py-1">+</button>
+                      </form>
+                    </td>
+                    <td>
+                      <span class="fw-bold fs-6">₹{{ item.item_subtotal }}</span>
+                    </td>
+                    <td class="text-end">
+                      <a href="{% url 'cart_remove' item.id %}" class="btn btn-sm text-danger" title="Remove Item">
+                        <i class="bi bi-trash fs-5"></i>
+                      </a>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mt-4">
+          <a href="{% url 'product_list' %}" class="btn btn-outline-dark">
+            <i class="bi bi-arrow-left me-1"></i> Continue Shopping
+          </a>
+          <span class="text-muted small"><i class="bi bi-shield-check text-gold me-1"></i> 100% Insured Delivery with Tamper-Proof Packaging</span>
+        </div>
+      </div>
+
+      <!-- Order Summary Column -->
+      <div class="col-lg-4">
+        <div class="card p-4 border-gold shadow-sm bg-white rounded-3">
+          <h4 class="serif-font fw-bold mb-3 border-bottom pb-2">Order Summary</h4>
+          
+          <div class="d-flex justify-content-between py-2 text-muted small">
+            <span>Total Gross Weight:</span>
+            <span class="fw-bold text-dark">{{ cart.total_gross_weight }} Grams</span>
+          </div>
+
+          <div class="d-flex justify-content-between py-2 text-muted small">
+            <span>Items Subtotal:</span>
+            <span class="fw-bold text-dark">₹{{ cart.subtotal }}</span>
+          </div>
+
+          <div class="d-flex justify-content-between py-2 text-muted small">
+            <span>Craftsmanship & Making Charges:</span>
+            <span>₹{{ cart.total_making_charges }}</span>
+          </div>
+
+          <div class="d-flex justify-content-between py-2 text-muted small">
+            <span>Jewellery GST (3%):</span>
+            <span class="fw-bold text-dark">₹{{ cart.gst_amount }}</span>
+          </div>
+
+          <div class="d-flex justify-content-between py-2 text-muted small">
+            <span>Insured Express Shipping:</span>
+            <span class="text-success fw-bold">FREE (Complimentary)</span>
+          </div>
+
+          <hr>
+
+          <div class="d-flex justify-content-between align-items-baseline mb-4">
+            <span class="fs-5 fw-bold text-dark">Grand Total:</span>
+            <span class="display-6 fw-bold text-dark">₹{{ cart.grand_total }}</span>
+          </div>
+
+          <div class="d-grid gap-2">
+            <a href="{% url 'checkout' %}" class="btn btn-gold btn-lg py-3 fw-bold">
+              <i class="bi bi-lock-fill me-1"></i> Proceed to Checkout
+            </a>
+          </div>
+
+          <div class="mt-4 p-3 bg-light rounded text-center small text-muted border">
+            <i class="bi bi-patch-check-fill text-gold me-1"></i> All shipments are covered by transit insurance until signature at your doorstep.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  {% else %}
+    <div class="text-center py-5 my-5">
+      <div class="fs-1 text-gold mb-3"><i class="bi bi-bag-x"></i></div>
+      <h2 class="serif-font fw-bold">Your Shopping Bag is Empty</h2>
+      <p class="text-muted small">Discover our timeless 22K temple gold necklaces, certified solitaire diamonds, and bridal jewels.</p>
+      <a href="{% url 'product_list' %}" class="btn btn-gold btn-lg mt-3">Explore Jewellery Catalog</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+

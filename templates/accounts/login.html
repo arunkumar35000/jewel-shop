@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Sign In | AURA Luxury Jewellery{% endblock %}
+
+{% block content %}
+<div class="container py-5 my-4">
+  <div class="row justify-content-center">
+    <div class="col-md-7 col-lg-5">
+      <div class="card p-4 p-md-5 border-gold-subtle shadow-lg bg-white rounded-3">
+        <div class="text-center mb-4">
+          <div class="fs-1 text-gold mb-2"><i class="bi bi-gem"></i></div>
+          <h2 class="serif-font fw-bold">Sign In to Aura</h2>
+          <p class="text-muted small">Access your royal collection, orders, and custom designs.</p>
+        </div>
+
+        <form method="POST" action="{% url 'login' %}">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ next }}">
+
+          <div class="mb-3">
+            <label class="form-label small fw-bold text-uppercase">Username or Email</label>
+            {{ form.username }}
+          </div>
+
+          <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <label class="form-label small fw-bold text-uppercase">Password</label>
+              <a href="{% url 'forgot_password' %}" class="small text-gold text-decoration-none">Forgot Password?</a>
+            </div>
+            {{ form.password }}
+          </div>
+
+          <div class="d-grid mt-4">
+            <button type="submit" class="btn btn-gold py-2 fw-bold">
+              <i class="bi bi-box-arrow-in-right me-2"></i> Sign In
+            </button>
+          </div>
+        </form>
+
+        <div class="mt-4 pt-3 border-top text-center">
+          <p class="small text-muted mb-2">New to Aura Gold Jewellery?</p>
+          <a href="{% url 'register' %}" class="btn btn-outline-dark btn-sm w-100 py-2">
+            Create an Account
+          </a>
+        </div>
+
+        <div class="mt-4 p-3 bg-light rounded text-center small text-muted border">
+          <strong>Demo Credentials:</strong><br>
+          Admin: <code>admin</code> / <code>Admin@123</code><br>
+          Customer: <code>customer</code> / <code>Customer@123</code>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

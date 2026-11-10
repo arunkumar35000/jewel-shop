@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% block title %}Manage Order #{{ order.order_number }} | AURA Admin{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <span class="badge bg-gold text-dark text-uppercase fw-bold">Order Administration</span>
+      <h2 class="serif-font fw-bold mt-1">Order #{{ order.order_number }}</h2>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'order_invoice' order.order_number %}" class="btn btn-outline-dark" target="_blank">
+        <i class="bi bi-printer me-1"></i> View Tax Invoice
+      </a>
+      <a href="{% url 'admin_orders_list' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Back to Orders
+      </a>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    
+    <!-- LEFT: Items & Customer Details -->
+    <div class="col-lg-7">
+      
+      <!-- Ordered Products -->
+      <div class="card p-4 border-gold-subtle shadow-sm bg-white rounded-3 mb-4">
+        <h5 class="serif-font fw-bold border-bottom pb-2 mb-3">Order Items</h5>
+        <div class="table-responsive">
+          <table class="table small align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Item</th>
+                <th>Purity & Wt</th>
+                <th>Qty</th>
+                <th class="text-end">Total Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in order.items.all %}
+                <tr>
+                  <td>
+                    <strong>{{ item.product_name }}</strong><br>
+                    <small class="text-muted font-monospace">{{ item.product_sku }}</small>
+                  </td>
+                  <td>{{ item.purity }} • {{ item.gross_weight }}g</td>
+                  <td>{{ item.quantity }}</td>
+                  <td class="text-end fw-bold">₹{{ item.total_price }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+            <tfoot class="border-top">
+              <tr>
+                <th colspan="3" class="text-end">Grand Total:</th>
+                <th class="text-end text-gold-dark fs-6">₹{{ order.grand_total }}</th>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- Customer & Shipping -->
+      <div class="card p-4 border-gold-subtle shadow-sm bg-white rounded-3">
+        <h5 class="serif-font fw-bold border-bottom pb-2 mb-3">Shipping & Customer Information</h5>
+        <div class="small text-muted">
+          <p class="mb-1"><strong>Client:</strong> {{ order.customer_name }}</p>
+          <p class="mb-1"><strong>Email:</strong> {{ order.customer_email }}</p>
+          <p class="mb-1"><strong>Phone:</strong> {{ order.customer_phone }}</p>
+          <p class="mb-1"><strong>Shipping Address:</strong> {{ order.shipping_address }}</p>
+          <p class="mb-0"><strong>Billing Address:</strong> {{ order.billing_address }}</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: Update Status Form -->
+    <div class="col-lg-5">
+      <div class="card p-4 border-gold shadow-sm bg-white rounded-3">
+        <h5 class="serif-font fw-bold border-bottom pb-2 mb-3">Update Order Status & Logistics</h5>
+
+        <form method="POST">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="update_status">
+
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Fulfillment Status</label>
+            <select name="order_status" class="form-select">
+              <option value="PENDING" {% if order.order_status == 'PENDING' %}selected{% endif %}>Pending Confirmation</option>
+              <option value="CONFIRMED" {% if order.order_status == 'CONFIRMED' %}selected{% endif %}>Order Confirmed</option>
+              <option value="CRAFTING" {% if order.order_status == 'CRAFTING' %}selected{% endif %}>Hallmarking & Crafting</option>
+              <option value="SHIPPED" {% if order.order_status == 'SHIPPED' %}selected{% endif %}>Dispatched / In Transit</option>
+              <option value="OUT_FOR_DELIVERY" {% if order.order_status == 'OUT_FOR_DELIVERY' %}selected{% endif %}>Out for Delivery</option>
+              <option value="DELIVERED" {% if order.order_status == 'DELIVERED' %}selected{% endif %}>Delivered to Customer</option>
+              <option value="CANCELLED" {% if order.order_status == 'CANCELLED' %}selected{% endif %}>Cancelled</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Payment Status</label>
+            <select name="payment_status" class="form-select">
+              <option value="PENDING" {% if order.payment_status == 'PENDING' %}selected{% endif %}>Pending Payment</option>
+              <option value="PAID" {% if order.payment_status == 'PAID' %}selected{% endif %}>Payment Received</option>
+              <option value="FAILED" {% if order.payment_status == 'FAILED' %}selected{% endif %}>Failed</option>
+              <option value="REFUNDED" {% if order.payment_status == 'REFUNDED' %}selected{% endif %}>Refunded</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Courier Partner</label>
+            <input type="text" name="courier_partner" class="form-control" value="{{ order.courier_partner }}">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Tracking AWB Number</label>
+            <input type="text" name="tracking_number" class="form-control" value="{{ order.tracking_number }}" placeholder="e.g. BLD-GOLD-778942IN">
+          </div>
+
+          <button type="submit" class="btn btn-gold w-100 py-2 fw-bold">
+            <i class="bi bi-save me-1"></i> Update Order
+          </button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+

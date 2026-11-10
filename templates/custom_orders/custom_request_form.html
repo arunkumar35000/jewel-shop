@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Custom Jewellery Design | AURA{% endblock %}
+
+{% block content %}
+<!-- Studio Banner -->
+<div class="py-5 bg-dark-obsidian text-light border-bottom border-gold">
+  <div class="container text-center py-3">
+    <span class="badge bg-gold text-dark text-uppercase px-3 py-1 mb-2 fw-bold">Custom Jewellery Design Service</span>
+    <h1 class="serif-font display-5 fw-bold text-white mt-1">Design Your Custom Jewellery</h1>
+    <p class="text-light opacity-75 col-lg-7 mx-auto mt-2">
+      Turn your heirloom dream into reality. Upload design sketches, family heirloom photos, or inspiration images. Our senior goldsmiths and 3D CAD designers will craft your personal hallmarked masterpiece.
+    </p>
+  </div>
+</div>
+
+<!-- Workflow Milestones Strip -->
+<div class="py-4 bg-white border-bottom">
+  <div class="container">
+    <div class="row text-center g-3">
+      <div class="col-6 col-md-3">
+        <div class="d-flex align-items-center justify-content-center gap-2">
+          <span class="badge rounded-circle bg-gold text-dark fs-6 p-2">1</span>
+          <span class="small fw-bold text-uppercase">Submit Details & Photos</span>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="d-flex align-items-center justify-content-center gap-2">
+          <span class="badge rounded-circle bg-dark text-gold border border-gold fs-6 p-2">2</span>
+          <span class="small fw-bold text-uppercase">Review Quote & 3D CAD</span>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="d-flex align-items-center justify-content-center gap-2">
+          <span class="badge rounded-circle bg-light text-dark border fs-6 p-2">3</span>
+          <span class="small fw-bold text-uppercase">Handcrafting & Hallmarking</span>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="d-flex align-items-center justify-content-center gap-2">
+          <span class="badge rounded-circle bg-light text-dark border fs-6 p-2">4</span>
+          <span class="small fw-bold text-uppercase">Insured Luxury Delivery</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      
+      <div class="custom-studio-card">
+        <form method="POST" enctype="multipart/form-data" id="customOrderForm">
+          {% csrf_token %}
+          
+          <!-- Section 1: Customer Contact -->
+          <div class="mb-5">
+            <h4 class="serif-font fw-bold text-dark border-bottom pb-2 mb-3">
+              <span class="text-gold me-2">01.</span> Client Contact Information
+            </h4>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label small fw-bold">Full Name *</label>
+                {{ form.full_name }}
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small fw-bold">Email Address *</label>
+                {{ form.email }}
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small fw-bold">Mobile Number (+91) *</label>
+                {{ form.phone }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2: Jewellery Specifications -->
+          <div class="mb-5">
+            <h4 class="serif-font fw-bold text-dark border-bottom pb-2 mb-3">
+              <span class="text-gold me-2">02.</span> Precious Metal & Specifications
+            </h4>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label small fw-bold">Jewellery Type *</label>
+                {{ form.jewellery_type }}
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small fw-bold">Precious Metal *</label>
+                {{ form.metal_type }}
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small fw-bold">Gold Purity *</label>
+                {{ form.gold_purity }}
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label small fw-bold">Expected Weight (Grams) *</label>
+                {{ form.expected_weight }}
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small fw-bold">Preferred Budget (₹ INR) *</label>
+                {{ form.preferred_budget }}
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small fw-bold">Target Delivery Date</label>
+                {{ form.expected_delivery_date }}
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label small fw-bold">Ring Size (if applicable)</label>
+                {{ form.ring_size }}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-bold">Necklace / Bangle Length / Size</label>
+                {{ form.necklace_length }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 3: Reference Image Uploads -->
+          <div class="mb-5">
+            <h4 class="serif-font fw-bold text-dark border-bottom pb-2 mb-3">
+              <span class="text-gold me-2">03.</span> Inspiration Photos & Design Sketches
+            </h4>
+            <p class="text-muted small mb-3">
+              Upload multiple photos (JPG, PNG, WEBP). You can upload screenshots, jewelry sketches, 3D CAD files, or multiple angle shots.
+            </p>
+
+            <!-- Drag & Drop Zone -->
+            <div class="upload-drop-zone" id="customUploadDropZone" onclick="document.getElementById('customRefImagesInput').click();">
+              <div class="fs-1 text-gold mb-2"><i class="bi bi-cloud-arrow-up"></i></div>
+              <h5 class="serif-font fw-bold">Drag & Drop Your Reference Images Here</h5>
+              <p class="text-muted small mb-2">or <span class="text-gold text-decoration-underline fw-bold">browse files from your device</span></p>
+              <small class="text-muted">Supports: JPG, JPEG, PNG, WEBP (Max 8 files, 10MB each)</small>
+            </div>
+            
+            <input type="file" name="reference_images" id="customRefImagesInput" class="d-none" multiple accept="image/*">
+
+            <!-- Live Previews Grid -->
+            <div id="customRefPreviewGrid" class="preview-thumb-grid"></div>
+          </div>
+
+          <!-- Section 4: Design Description & Notes -->
+          <div class="mb-5">
+            <h4 class="serif-font fw-bold text-dark border-bottom pb-2 mb-3">
+              <span class="text-gold me-2">04.</span> Design Vision & Special Instructions
+            </h4>
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label small fw-bold">Detailed Design Description *</label>
+                {{ form.design_description }}
+              </div>
+              <div class="col-12">
+                <label class="form-label small fw-bold">Special Instructions / Custom Engravings</label>
+                {{ form.special_instructions }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="d-grid mt-4">
+            <button type="submit" class="btn btn-gold btn-lg py-3 fw-bold">
+              <i class="bi bi-gem me-2"></i> Submit Custom Jewellery Request
+            </button>
+            <small class="text-muted text-center mt-2">
+              <i class="bi bi-shield-check text-gold me-1"></i> No upfront payment required. You will review the artisan quote and 3D CAD render first.
+            </small>
+          </div>
+
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+

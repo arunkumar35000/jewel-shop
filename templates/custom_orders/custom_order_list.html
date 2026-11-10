@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block title %}My Custom Design Requests | AURA Jewellery{% endblock %}
+
+{% block content %}
+<div class="py-5 bg-white border-bottom">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <span class="text-gold text-uppercase fw-bold small">Custom Design Tracking</span>
+        <h1 class="serif-font display-6 fw-bold mt-1">My Custom Design Requests</h1>
+      </div>
+      <a href="{% url 'custom_order_create' %}" class="btn btn-gold">
+        <i class="bi bi-pencil-square me-1"></i> New Request
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="container py-5">
+  {% if custom_orders %}
+    <div class="row g-4">
+      {% for req in custom_orders %}
+        <div class="col-md-6 col-lg-4">
+          <div class="card h-100 p-4 border-gold-subtle shadow-sm bg-white rounded-3 position-relative d-flex flex-column">
+            
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <span class="font-monospace small fw-bold text-muted">{{ req.request_id }}</span>
+              <span class="badge {% if req.status == 'QUOTATION_SENT' %}bg-warning text-dark{% elif req.status == 'APPROVED' %}bg-success{% else %}bg-dark text-gold border border-gold{% endif %}">
+                {{ req.get_status_display }}
+              </span>
+            </div>
+
+            <h4 class="serif-font fw-bold mb-1">{{ req.get_jewellery_type_display }}</h4>
+            <div class="text-muted small mb-3">
+              {{ req.get_metal_type_display }} • {{ req.gold_purity }} • Est. {{ req.expected_weight }}g
+            </div>
+
+            <!-- Reference Image Thumbnails -->
+            <div class="d-flex gap-2 mb-3 overflow-hidden" style="height: 60px;">
+              {% for img in req.reference_images.all|slice:":3" %}
+                <img src="{{ img.image.url }}" alt="Ref" class="rounded border" style="width: 60px; height: 60px; object-fit: cover;">
+              {% empty %}
+                <div class="bg-light rounded border p-2 text-muted small">No photos attached</div>
+              {% endfor %}
+              {% if req.reference_images.count > 3 %}
+                <div class="bg-dark text-gold rounded border border-gold d-flex align-items-center justify-content-center fw-bold small" style="width: 60px; height: 60px;">
+                  +{{ req.reference_images.count|add:"-3" }}
+                </div>
+              {% endif %}
+            </div>
+
+            <!-- Quotation Teaser -->
+            {% if req.latest_quotation %}
+              <div class="p-2 bg-light rounded border border-gold-subtle small mb-3">
+                <div class="d-flex justify-content-between">
+                  <span>Artisan Quotation:</span>
+                  <span class="fw-bold text-dark">₹{{ req.latest_quotation.total_estimated_price }}</span>
+                </div>
+                <div class="text-muted" style="font-size: 0.72rem;">Status: {{ req.latest_quotation.get_status_display }}</div>
+              </div>
+            {% endif %}
+
+            <div class="mt-auto pt-3 border-top">
+              <a href="{% url 'customer_custom_order_detail' req.request_id %}" class="btn btn-outline-gold w-100 btn-sm py-2">
+                View Timeline & Quotation <i class="bi bi-arrow-right ms-1"></i>
+              </a>
+            </div>
+
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="text-center py-5 my-5">
+      <div class="fs-1 text-gold mb-3"><i class="bi bi-palette2"></i></div>
+      <h3 class="serif-font fw-bold">No Custom Design Requests Yet</h3>
+      <p class="text-muted small">Have a unique gold necklace or diamond solitaire in mind? Submit your reference photo.</p>
+      <a href="{% url 'custom_order_create' %}" class="btn btn-gold mt-2">Start Your Custom Design</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+

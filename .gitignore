@@ -1,0 +1,36 @@
+# Virtual Environments
+venv/
+env/
+ENV/
+.venv/
+
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# Local Environment Secrets
+.env
+.env.local
+
+# SQLite Database (uncomment if you want a fresh DB per clone)
+# db.sqlite3
+
+# Uploaded custom order user files (keep sample product media)
+media/custom_orders/
+
+# IDE & Editor Files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+
+# OS Generated Files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+

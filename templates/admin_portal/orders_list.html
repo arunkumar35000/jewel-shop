@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block title %}Manage Orders | AURA Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 px-lg-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <span class="badge bg-gold text-dark text-uppercase fw-bold">Order Fulfillment</span>
+      <h2 class="serif-font fw-bold mt-1">Customer Orders</h2>
+    </div>
+    <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-dark">
+      <i class="bi bi-arrow-left me-1"></i> Dashboard
+    </a>
+  </div>
+
+  <!-- Search & Filter Filter -->
+  <div class="card p-3 mb-4 border-gold-subtle shadow-sm bg-white">
+    <form method="GET" class="row g-2 align-items-center">
+      <div class="col-md-5">
+        <div class="input-group input-group-sm">
+          <input type="text" name="q" class="form-control" placeholder="Search order number, customer name, phone..." value="{{ q }}">
+          <button class="btn btn-gold" type="submit"><i class="bi bi-search"></i></button>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+          <option value="">All Fulfillment Statuses</option>
+          {% for code, label in status_choices %}
+            <option value="{{ code }}" {% if status_filter == code %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3 text-end">
+        <a href="{% url 'admin_orders_list' %}" class="btn btn-outline-secondary btn-sm">Reset</a>
+      </div>
+    </form>
+  </div>
+
+  <div class="card border-gold-subtle shadow-sm bg-white overflow-hidden">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0 small">
+        <thead class="table-dark text-uppercase">
+          <tr>
+            <th>Order #</th>
+            <th>Date</th>
+            <th>Customer & Phone</th>
+            <th>Items Count</th>
+            <th>Total Amount</th>
+            <th>Payment</th>
+            <th>Order Status</th>
+            <th>AWB Tracking</th>
+            <th class="text-end">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ord in orders %}
+            <tr>
+              <td class="fw-bold font-monospace">{{ ord.order_number }}</td>
+              <td class="text-muted">{{ ord.created_at|date:"d M Y, h:i A" }}</td>
+              <td>
+                <div class="fw-bold">{{ ord.customer_name }}</div>
+                <small class="text-muted">{{ ord.customer_phone }}</small>
+              </td>
+              <td>{{ ord.items.count }} piece(s)</td>
+              <td class="fw-bold fs-6">₹{{ ord.grand_total }}</td>
+              <td>
+                <span class="badge {% if ord.payment_status == 'PAID' %}bg-success{% else %}bg-warning text-dark{% endif %}">
+                  {{ ord.get_payment_method_display }} ({{ ord.get_payment_status_display }})
+                </span>
+              </td>
+              <td>
+                <span class="badge {% if ord.order_status == 'DELIVERED' %}bg-success{% elif ord.order_status == 'CANCELLED' %}bg-danger{% else %}bg-dark text-gold border border-gold{% endif %}">
+                  {{ ord.get_order_status_display }}
+                </span>
+              </td>
+              <td>
+                {% if ord.tracking_number %}
+                  <span class="font-monospace small">{{ ord.tracking_number }}</span>
+                {% else %}
+                  <span class="text-muted small">Not Dispatched</span>
+                {% endif %}
+              </td>
+              <td class="text-end">
+                <a href="{% url 'admin_order_detail' ord.order_number %}" class="btn btn-gold btn-sm py-1 px-3">
+                  Manage &raquo;
+                </a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="9" class="text-center py-5 text-muted">No orders match criteria.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% block title %}Custom Request {{ order.request_id }} | AURA Admin{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <span class="badge bg-gold text-dark text-uppercase fw-bold">Artisan Studio Review</span>
+      <h2 class="serif-font fw-bold mt-1">Custom Request #{{ order.request_id }}</h2>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'admin_quotation_create' order.request_id %}" class="btn btn-gold">
+        <i class="bi bi-file-earmark-plus me-1"></i> Prepare / Send Quotation
+      </a>
+      <a href="{% url 'admin_custom_requests_list' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Back to Requests
+      </a>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    
+    <!-- LEFT: Request Details & Attached Photos -->
+    <div class="col-lg-7">
+      
+      <!-- Specifications -->
+      <div class="card p-4 border-gold-subtle shadow-sm bg-white rounded-3 mb-4">
+        <h5 class="serif-font fw-bold border-bottom pb-2 mb-3">Client Design Specifications</h5>
+        
+        <table class="table-luxury-specs border rounded mb-3">
+          <tr>
+            <td>Client Name:</td>
+            <td class="fw-bold">{{ order.full_name }}</td>
+          </tr>
+          <tr>
+            <td>Contact Email / Phone:</td>
+            <td>{{ order.email }} • {{ order.phone }}</td>
+          </tr>
+          <tr>
+            <td>Jewellery Type:</td>
+            <td class="fw-bold">{{ order.get_jewellery_type_display }}</td>
+          </tr>
+          <tr>
+            <td>Metal & Purity:</td>
+            <td>{{ order.get_metal_type_display }} • {{ order.gold_purity }}</td>
+          </tr>
+          <tr>
+            <td>Target Weight:</td>
+            <td><strong>{{ order.expected_weight }}</strong> Grams</td>
+          </tr>
+          <tr>
+            <td>Client Budget:</td>
+            <td class="fw-bold fs-6">₹{{ order.preferred_budget }}</td>
+          </tr>
+          {% if order.ring_size %}
+            <tr><td>Ring Size:</td><td>{{ order.ring_size }}</td></tr>
+          {% endif %}
+          {% if order.necklace_length %}
+            <tr><td>Length:</td><td>{{ order.necklace_length }}</td></tr>
+          {% endif %}
+        </table>
+
+        <div class="mb-3">
+          <h6 class="small fw-bold text-uppercase text-muted">Design Description:</h6>
+          <p class="small bg-light p-3 rounded border text-dark">{{ order.design_description }}</p>
+        </div>
+
+        {% if order.special_instructions %}
+          <div>
+            <h6 class="small fw-bold text-uppercase text-muted">Special Instructions & Engravings:</h6>
+            <p class="small bg-light p-3 rounded border text-dark">{{ order.special_instructions }}</p>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Reference Photos Gallery -->
+      <div class="card p-4 border-gold-subtle shadow-sm bg-white rounded-3 mb-4">
+        <h5 class="serif-font fw-bold border-bottom pb-2 mb-3">Customer Reference Photos ({{ images.count }})</h5>
+        <div class="row row-cols-2 row-cols-md-3 g-2">
+          {% for img in images %}
+            <div class="col">
+              <a href="{{ img.image.url }}" target="_blank">
+                <img src="{{ img.image.url }}" alt="Ref" class="img-fluid rounded border shadow-sm" style="height: 140px; width: 100%; object-fit: cover;">
+              </a>
+              <small class="text-muted d-block text-truncate mt-1">{{ img.caption }}</small>
+            </div>
+          {% empty %}
+            <div class="col-12 text-muted small">No reference photos uploaded.</div>
+          {% endfor %}
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: Status Update & Quotations -->
+    <div class="col-lg-5">
+      
+      <!-- Status Pipeline Card -->
+      <div class="card p-4 border-gold shadow-sm bg-white rounded-3 mb-4">
+        <h5 class="serif-font fw-bold border-bottom pb-2 mb-3">Update Workflow Status</h5>
+
+        <form method="POST">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="update_status">
+
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Current Pipeline Status</label>
+            <select name="status" class="form-select">
+              {% for code, label in order.STATUS_CHOICES %}
+                <option value="{{ code }}" {% if order.status == code %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Internal Workshop / Artisan Notes</label>
+            <textarea name="admin_notes" rows="3" class="form-control">{{ order.admin_notes }}</textarea>
+          </div>
+
+          <button type="submit" class="btn btn-gold w-100 py-2 fw-bold">Update Pipeline Status</button>
+        </form>
+      </div>
+
+      <!-- Generated Quotations History -->
+      <div class="card p-4 border-gold-subtle shadow-sm bg-white rounded-3">
+        <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+          <h5 class="serif-font fw-bold mb-0">Quotations ({{ quotations.count }})</h5>
+          <a href="{% url 'admin_quotation_create' order.request_id %}" class="btn btn-gold btn-sm">
+            <i class="bi bi-plus-lg"></i> New Quote
+          </a>
+        </div>
+
+        {% for qte in quotations %}
+          <div class="p-3 bg-light rounded border mb-3 small">
+            <div class="d-flex justify-content-between font-monospace fw-bold">
+              <span>{{ qte.quotation_number }}</span>
+              <span class="badge {% if qte.status == 'ACCEPTED' %}bg-success{% elif qte.status == 'REVISION_REQUESTED' %}bg-warning text-dark{% else %}bg-primary{% endif %}">
+                {{ qte.get_status_display }}
+              </span>
+            </div>
+            <div class="mt-2">
+              <strong>Est. Weight:</strong> {{ qte.estimated_weight }}g • <strong>Price:</strong> <span class="fw-bold text-dark">₹{{ qte.total_estimated_price }}</span>
+            </div>
+            <div class="text-muted mt-1">
+              Making Charges: ₹{{ qte.making_charges }} • Days: {{ qte.estimated_making_days }}
+            </div>
+            {% if qte.customer_feedback %}
+              <div class="mt-2 text-danger small">
+                <strong>Customer Feedback:</strong> "{{ qte.customer_feedback }}"
+              </div>
+            {% endif %}
+          </div>
+        {% empty %}
+          <p class="text-muted small mb-0">No quotation sent yet. Click "New Quote" to create one.</p>
+        {% endfor %}
+      </div>
+
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,319 @@
+{% extends 'base.html' %}
+{% block title %}Secure Checkout | AURA Luxury Jewellery{% endblock %}
+
+{% block content %}
+<div class="py-4 bg-white border-bottom">
+  <div class="container">
+    <div class="d-flex align-items-center gap-2">
+      <i class="bi bi-shield-lock-fill text-gold fs-4"></i>
+      <div>
+        <h2 class="serif-font fw-bold mb-0">Secure Luxury Checkout</h2>
+        <small class="text-muted">100% Insured Delivery • BIS Hallmarked Guarantee • 256-Bit SSL Encryption</small>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container py-5">
+  <form method="POST" action="{% url 'checkout' %}" id="checkoutForm">
+    {% csrf_token %}
+    <div class="row g-4 g-lg-5">
+      
+      <!-- Left Column: Checkout Details -->
+      <div class="col-lg-7">
+        
+        <!-- Step 1: Customer Contact -->
+        <div class="card p-4 border-gold-subtle shadow-sm bg-white rounded-3 mb-4">
+          <h5 class="serif-font fw-bold text-dark border-bottom pb-2 mb-3">
+            <span class="text-gold me-2">1.</span> Customer Contact Details
+          </h5>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">Full Name *</label>
+              <input type="text" name="full_name" class="form-control" required value="{{ user.get_full_name|default:'' }}" placeholder="e.g. Ananya Sharma">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">Mobile Phone (+91) *</label>
+              <input type="tel" name="phone" class="form-control" required value="{{ user.profile.phone|default:'' }}" placeholder="+91 98765 43210">
+            </div>
+            <div class="col-12">
+              <label class="form-label small fw-bold">Email Address (for Invoice & Tracking Updates) *</label>
+              <input type="email" name="email" class="form-control" required value="{{ user.email|default:'' }}" placeholder="ananya@example.com">
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Shipping Destination Address -->
+        <div class="card p-4 border-gold-subtle shadow-sm bg-white rounded-3 mb-4">
+          <h5 class="serif-font fw-bold text-dark border-bottom pb-2 mb-3">
+            <span class="text-gold me-2">2.</span> Insured Shipping Address
+          </h5>
+
+          {% if saved_addresses %}
+            <div class="mb-3">
+              <label class="form-label small fw-bold text-uppercase text-muted">Select Saved Address:</label>
+              <div class="row g-2">
+                {% for addr in saved_addresses %}
+                  <div class="col-12">
+                    <div class="form-check p-3 border rounded {% if addr.is_default %}border-gold bg-light{% endif %}">
+                      <input class="form-check-input ms-0 me-3" type="radio" name="selected_address_id" id="addr_{{ addr.id }}" value="{{ addr.id }}" {% if addr.is_default or forloop.first %}checked{% endif %} onchange="document.getElementById('newAddressFields').style.display = 'none';">
+                      <label class="form-check-label small" for="addr_{{ addr.id }}">
+                        <strong>{{ addr.full_name }}</strong> ({{ addr.get_address_type_display }})<br>
+                        <span class="text-muted">{{ addr.single_line_address }} • Phone: {{ addr.phone }}</span>
+                      </label>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div class="form-check mb-3">
+              <input class="form-check-input" type="radio" name="selected_address_id" id="newAddressRadio" value="" onchange="document.getElementById('newAddressFields').style.display = 'block';">
+              <label class="form-check-label small fw-bold" for="newAddressRadio">
+                Deliver to a different / new address
+              </label>
+            </div>
+          {% endif %}
+
+          <div id="newAddressFields" style="{% if saved_addresses %}display: none;{% endif %}">
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label small fw-bold">Street Address (House/Flat, Apartment, Road) *</label>
+                <textarea name="street_address" class="form-control" rows="2" placeholder="e.g. Flat 402, Royale Heritage Palms, MG Road"></textarea>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small fw-bold">City *</label>
+                <input type="text" name="city" class="form-control" placeholder="Bengaluru">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small fw-bold">State *</label>
+                <input type="text" name="state" class="form-control" placeholder="Karnataka">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small fw-bold">PIN Code *</label>
+                <input type="text" name="pincode" class="form-control" placeholder="560001" maxlength="6">
+              </div>
+              {% if user.is_authenticated %}
+                <div class="col-12">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="save_address" value="1" id="saveAddrCheck" checked>
+                    <label class="form-check-label small" for="saveAddrCheck">
+                      Save this address to my profile
+                    </label>
+                  </div>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Billing Same Checkbox -->
+          <div class="form-check mt-3 pt-3 border-top">
+            <input class="form-check-input" type="checkbox" name="billing_same" value="1" id="billingSameCheck" checked onchange="document.getElementById('billingAddressField').style.display = this.checked ? 'none' : 'block';">
+            <label class="form-check-label small" for="billingSameCheck">
+              Billing address is the same as shipping address
+            </label>
+          </div>
+
+          <div id="billingAddressField" class="mt-3" style="display: none;">
+            <label class="form-label small fw-bold">Billing Address</label>
+            <textarea name="billing_street" class="form-control" rows="2" placeholder="Enter formal billing address for Tax Invoice"></textarea>
+          </div>
+        </div>
+
+        <!-- Step 3: Payment Method Selection -->
+        <div class="card p-4 border-gold-subtle shadow-sm bg-white rounded-3 mb-4">
+          <h5 class="serif-font fw-bold text-dark border-bottom pb-2 mb-3">
+            <span class="text-gold me-2">3.</span> Select Payment Method
+          </h5>
+
+          <div class="d-flex flex-column gap-3">
+            
+            <!-- UPI / QR Option -->
+            <div class="p-3 border rounded border-gold-subtle bg-light">
+              <div class="form-check">
+                <input class="form-check-input ms-0 me-3" type="radio" name="payment_method" id="payUPI" value="UPI" checked onchange="togglePaymentPanels('upi')">
+                <label class="form-check-label" for="payUPI">
+                  <div class="fw-bold text-dark"><i class="bi bi-qr-code text-gold me-2"></i> UPI / Instant QR Code (Recommended)</div>
+                  <small class="text-muted">Pay securely using Google Pay, PhonePe, Paytm, or BHIM UPI.</small>
+                </label>
+              </div>
+
+              <!-- UPI Interactive Panel -->
+              <div id="panelUPI" class="mt-3 p-3 bg-white rounded border border-gold-subtle text-center">
+                <div class="row align-items-center g-3">
+                  <div class="col-sm-5 text-center">
+                    <div class="p-2 border rounded bg-white shadow-sm d-inline-block">
+                      <svg width="130" height="130" viewBox="0 0 100 100" fill="#000">
+                        <rect width="100" height="100" fill="#fff"/>
+                        <path d="M10 10h30v30h-30z M15 15h20v20h-20z M20 20h10v10h-10z M60 10h30v30h-30z M65 15h20v20h-20z M70 20h10v10h-10z M10 60h30v30h-30z M15 65h20v20h-20z M20 70h10v10h-10z M45 15h10v10h-10z M45 35h10v10h-10z M45 55h10v10h-10z M45 75h10v10h-10z M55 45h10v10h-10z M65 55h10v10h-10z M75 45h10v10h-10z M75 65h10v10h-10z M60 75h10v10h-10z M80 75h10v10h-10z M55 85h15v5h-15z M25 45h10v10h-10z"/>
+                        <circle cx="50" cy="50" r="12" fill="#D4AF37"/>
+                        <text x="50" y="54" font-size="10" font-family="serif" font-weight="bold" fill="#000" text-anchor="middle">AURA</text>
+                      </svg>
+                    </div>
+                    <small class="text-muted d-block mt-1">Scan & Pay ₹{{ cart.grand_total }}</small>
+                  </div>
+                  <div class="col-sm-7 text-start">
+                    <div class="small fw-bold text-dark mb-1">Official Flagship UPI ID:</div>
+                    <div class="input-group input-group-sm mb-2">
+                      <input type="text" class="form-control font-monospace bg-light" value="aurajewels@okhdfcbank" readonly id="upiIdText">
+                      <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText('aurajewels@okhdfcbank'); showToast('UPI ID Copied!', 'info');"><i class="bi bi-copy"></i></button>
+                    </div>
+                    <small class="text-success d-block mb-1"><i class="bi bi-shield-check me-1"></i> Instant 0% Convenience Fee</small>
+                    <small class="text-muted">Once order is confirmed, transaction reference will be auto-linked.</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card / NetBanking Option -->
+            <div class="p-3 border rounded">
+              <div class="form-check">
+                <input class="form-check-input ms-0 me-3" type="radio" name="payment_method" id="payCard" value="ONLINE_CARD" onchange="togglePaymentPanels('card')">
+                <label class="form-check-label" for="payCard">
+                  <div class="fw-bold text-dark"><i class="bi bi-credit-card-2-front text-gold me-2"></i> Credit / Debit Card & NetBanking</div>
+                  <small class="text-muted">Visa, Mastercard, RuPay, Amex & All Major Indian Banks.</small>
+                </label>
+              </div>
+
+              <!-- Card Simulated Panel -->
+              <div id="panelCard" class="mt-3 p-3 bg-light rounded border small" style="display: none;">
+                <div class="row g-2">
+                  <div class="col-12">
+                    <label class="form-label mb-1">Card Number</label>
+                    <input type="text" class="form-control form-control-sm font-monospace" placeholder="4111 2222 3333 4444" maxlength="19">
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label mb-1">Expiry Date</label>
+                    <input type="text" class="form-control form-control-sm" placeholder="MM/YY" maxlength="5">
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label mb-1">CVV / Security Code</label>
+                    <input type="password" class="form-control form-control-sm" placeholder="123" maxlength="4">
+                  </div>
+                </div>
+                <small class="text-muted d-block mt-2"><i class="bi bi-lock-fill text-gold me-1"></i> Simulated 256-Bit SSL payment gateway.</small>
+              </div>
+            </div>
+
+            <!-- Cash on Delivery -->
+            <div class="p-3 border rounded">
+              <div class="form-check">
+                <input class="form-check-input ms-0 me-3" type="radio" name="payment_method" id="payCOD" value="COD" onchange="togglePaymentPanels('cod')">
+                <label class="form-check-label" for="payCOD">
+                  <div class="fw-bold text-dark"><i class="bi bi-cash-stack text-gold me-2"></i> Insured Cash on Delivery (COD)</div>
+                  <small class="text-muted">Pay cash upon delivery with tamper-evident seal verification.</small>
+                </label>
+              </div>
+              <div id="panelCOD" class="mt-2 text-muted small ps-4" style="display: none;">
+                <i class="bi bi-info-circle text-gold me-1"></i> Please keep exact cash of <strong>₹{{ cart.grand_total }}</strong> ready. OTP verification will be required upon delivery.
+              </div>
+            </div>
+
+            <!-- Bank Transfer -->
+            <div class="p-3 border rounded">
+              <div class="form-check">
+                <input class="form-check-input ms-0 me-3" type="radio" name="payment_method" id="payBank" value="BANK_TRANSFER" onchange="togglePaymentPanels('bank')">
+                <label class="form-check-label" for="payBank">
+                  <div class="fw-bold text-dark"><i class="bi bi-bank text-gold me-2"></i> Direct Showroom Bank Transfer / RTGS</div>
+                  <small class="text-muted">Transfer directly to our HDFC / ICICI bullion account.</small>
+                </label>
+              </div>
+              <div id="panelBank" class="mt-3 p-3 bg-light rounded border small" style="display: none;">
+                <div><strong>Beneficiary:</strong> Aura Luxury Jewellery Pvt Ltd</div>
+                <div><strong>Bank:</strong> HDFC Bank, Palace Road Branch</div>
+                <div><strong>A/C No:</strong> 50200084920194 (Current)</div>
+                <div><strong>IFSC Code:</strong> HDFC0001248</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Special Instructions / Notes -->
+        <div class="card p-3 border-gold-subtle bg-white shadow-sm">
+          <label class="form-label small fw-bold">Delivery Instructions / Gift Message (Optional)</label>
+          <textarea name="order_notes" rows="2" class="form-control form-control-sm" placeholder="e.g. Ring sizing preference, gift velvet box, call before delivery..."></textarea>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Order Review & Confirmation -->
+      <div class="col-lg-5">
+        <div class="card p-4 border-gold shadow-sm bg-white rounded-3 sticky-top" style="top: 100px;">
+          <h4 class="serif-font fw-bold mb-3 border-bottom pb-2">Order Review ({{ cart.total_items }} Items)</h4>
+          
+          <div class="overflow-auto pe-1 mb-3" style="max-height: 250px;">
+            {% for item in cart.items.all %}
+              <div class="d-flex align-items-center gap-3 py-2 border-bottom">
+                {% if item.product.primary_image %}
+                  <img src="{{ item.product.primary_image.image.url }}" alt="{{ item.product.name }}" class="rounded border" style="width: 55px; height: 55px; object-fit: cover;">
+                {% endif %}
+                <div class="flex-grow-1 min-width-0">
+                  <div class="fw-bold small text-truncate">{{ item.product.name }}</div>
+                  <div class="text-muted" style="font-size: 0.72rem;">
+                    {{ item.product.purity }} • Qty: {{ item.quantity }} • {{ item.product.gross_weight }}g
+                  </div>
+                  <div class="fw-bold text-dark small">₹{{ item.item_subtotal }}</div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+
+          <!-- Financial Breakdown -->
+          <div class="d-flex justify-content-between py-1 text-muted small">
+            <span>Items Subtotal:</span>
+            <span class="fw-bold text-dark">₹{{ cart.subtotal }}</span>
+          </div>
+
+          <div class="d-flex justify-content-between py-1 text-muted small">
+            <span>Craftsmanship / Making Charges:</span>
+            <span>₹{{ cart.total_making_charges }}</span>
+          </div>
+
+          <div class="d-flex justify-content-between py-1 text-muted small">
+            <span>Jewellery GST (3%):</span>
+            <span class="fw-bold text-dark">₹{{ cart.gst_amount }}</span>
+          </div>
+
+          <div class="d-flex justify-content-between py-1 text-muted small">
+            <span>Insured Express Shipping:</span>
+            <span class="text-success fw-bold">FREE</span>
+          </div>
+
+          <hr>
+
+          <div class="d-flex justify-content-between align-items-baseline mb-4">
+            <span class="fs-5 fw-bold text-dark">Total Amount:</span>
+            <span class="fs-3 fw-bold text-dark">₹{{ cart.grand_total }}</span>
+          </div>
+
+          <button type="submit" class="btn btn-gold btn-lg w-100 py-3 fw-bold shadow-lg">
+            <i class="bi bi-shield-check me-2"></i> Place & Confirm Order
+          </button>
+
+          <div class="mt-4 p-3 bg-light rounded text-center small text-muted border">
+            <i class="bi bi-lock-fill text-gold me-1"></i> By clicking "Place Order", your precious jewellery will be reserved, hallmarked, and dispatched with transit insurance.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function togglePaymentPanels(method) {
+    const pUpi = document.getElementById('panelUPI');
+    const pCard = document.getElementById('panelCard');
+    const pCod = document.getElementById('panelCOD');
+    const pBank = document.getElementById('panelBank');
+    if (pUpi) pUpi.style.display = method === 'upi' ? 'block' : 'none';
+    if (pCard) pCard.style.display = method === 'card' ? 'block' : 'none';
+    if (pCod) pCod.style.display = method === 'cod' ? 'block' : 'none';
+    if (pBank) pBank.style.display = method === 'bank' ? 'block' : 'none';
+  }
+</script>
+{% endblock %}
+

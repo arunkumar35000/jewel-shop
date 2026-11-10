@@ -1,0 +1,249 @@
+{% extends 'base.html' %}
+{% block title %}Request {{ order.request_id }} | AURA{% endblock %}
+
+{% block content %}
+<div class="py-4 bg-white border-bottom">
+  <div class="container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+      <div>
+        <span class="badge bg-gold text-dark text-uppercase fw-bold mb-1">Custom Order Tracker</span>
+        <h1 class="serif-font display-6 fw-bold mb-0">Request #{{ order.request_id }}</h1>
+        <small class="text-muted">Submitted on {{ order.created_at|date:"d M Y, h:i A" }}</small>
+      </div>
+      <div class="mt-3 mt-md-0">
+        <span class="badge fs-6 bg-dark border border-gold text-gold p-2">
+          Status: {{ order.get_status_display }}
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container py-5">
+  
+  <!-- ORDER WORKFLOW STATUS TIMELINE -->
+  <div class="card p-4 p-md-5 border-gold-subtle shadow-sm bg-white rounded-3 mb-5">
+    <h4 class="serif-font fw-bold mb-4 text-center">Custom Manufacturing Lifecycle</h4>
+    
+    <div class="order-workflow-timeline d-none d-md-flex">
+      <div class="timeline-step-node {% if order.status_step_index >= 1 %}completed{% endif %}">
+        <div class="step-icon-bubble">1</div>
+        <div class="step-label">Submitted</div>
+      </div>
+      <div class="timeline-step-node {% if order.status_step_index >= 2 %}completed{% elif order.status_step_index == 1 %}active{% endif %}">
+        <div class="step-icon-bubble">2</div>
+        <div class="step-label">Under Review</div>
+      </div>
+      <div class="timeline-step-node {% if order.status_step_index >= 3 %}completed{% elif order.status_step_index == 2 %}active{% endif %}">
+        <div class="step-icon-bubble">3</div>
+        <div class="step-label">3D CAD Design</div>
+      </div>
+      <div class="timeline-step-node {% if order.status_step_index >= 4 %}completed{% elif order.status_step_index == 3 %}active{% endif %}">
+        <div class="step-icon-bubble">4</div>
+        <div class="step-label">Quote Sent</div>
+      </div>
+      <div class="timeline-step-node {% if order.status_step_index >= 5 %}completed{% elif order.status_step_index == 4 %}active{% endif %}">
+        <div class="step-icon-bubble">5</div>
+        <div class="step-label">Approved</div>
+      </div>
+      <div class="timeline-step-node {% if order.status_step_index >= 6 %}completed{% elif order.status_step_index == 5 %}active{% endif %}">
+        <div class="step-icon-bubble">6</div>
+        <div class="step-label">In Production</div>
+      </div>
+      <div class="timeline-step-node {% if order.status_step_index >= 7 %}completed{% elif order.status_step_index == 6 %}active{% endif %}">
+        <div class="step-icon-bubble">7</div>
+        <div class="step-label">Hallmarked</div>
+      </div>
+      <div class="timeline-step-node {% if order.status_step_index >= 8 %}completed{% endif %}">
+        <div class="step-icon-bubble">8</div>
+        <div class="step-label">Delivered</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    
+    <!-- LEFT: Quotation Review Card (if available) -->
+    <div class="col-lg-6">
+      {% if latest_quote %}
+        <div class="card p-4 border-gold shadow-lg bg-white rounded-3 mb-4">
+          <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+            <div>
+              <span class="badge bg-gold text-dark text-uppercase fw-bold">Official Artisan Quotation</span>
+              <h4 class="serif-font fw-bold mt-1 mb-0">{{ latest_quote.quotation_number }}</h4>
+            </div>
+            <span class="badge {% if latest_quote.status == 'ACCEPTED' %}bg-success{% elif latest_quote.status == 'REVISION_REQUESTED' %}bg-warning text-dark{% else %}bg-primary{% endif %}">
+              {{ latest_quote.get_status_display }}
+            </span>
+          </div>
+
+          <!-- Quotation Financial Breakdown Table -->
+          <table class="table-luxury-specs border rounded mb-4">
+            <tr>
+              <td>Target Gold Weight:</td>
+              <td class="fw-bold">{{ latest_quote.estimated_weight }} Grams</td>
+            </tr>
+            <tr>
+              <td>Applied Bullion Rate:</td>
+              <td>₹{{ latest_quote.metal_rate_applied }}/g</td>
+            </tr>
+            <tr>
+              <td>Estimated Pure Metal Cost:</td>
+              <td>₹{{ latest_quote.estimated_metal_cost }}</td>
+            </tr>
+            <tr>
+              <td>Artisan Making & Setting Charges:</td>
+              <td>₹{{ latest_quote.making_charges }}</td>
+            </tr>
+            <tr>
+              <td>Stones / Diamond Cost:</td>
+              <td>₹{{ latest_quote.stone_charges }}</td>
+            </tr>
+            <tr>
+              <td>Jewellery GST (3%):</td>
+              <td>₹{{ latest_quote.gst_amount }}</td>
+            </tr>
+            <tr class="table-light">
+              <td class="fs-5 fw-bold text-dark">Total Estimated Price:</td>
+              <td class="fs-5 fw-bold text-gold-dark">₹{{ latest_quote.total_estimated_price }}</td>
+            </tr>
+            <tr>
+              <td>Estimated Crafting Time:</td>
+              <td>{{ latest_quote.estimated_making_days }} Working Days</td>
+            </tr>
+          </table>
+
+          {% if latest_quote.design_notes %}
+            <div class="p-3 bg-light rounded border mb-4">
+              <h6 class="fw-bold small text-uppercase mb-1"><i class="bi bi-chat-quote-fill text-gold me-1"></i> Artisan Workshop Notes:</h6>
+              <p class="small text-muted mb-0">{{ latest_quote.design_notes }}</p>
+            </div>
+          {% endif %}
+
+          {% if latest_quote.cad_design_file %}
+            <div class="mb-4">
+              <a href="{{ latest_quote.cad_design_file.url }}" class="btn btn-outline-dark btn-sm w-100" target="_blank">
+                <i class="bi bi-file-earmark-pdf me-1 text-gold"></i> Download 3D CAD Blueprint Render
+              </a>
+            </div>
+          {% endif %}
+
+          <!-- Customer Accept / Revise Actions -->
+          {% if latest_quote.status == 'SENT' and user.is_authenticated and user == order.user %}
+            <div class="border-top pt-3">
+              <h6 class="fw-bold text-dark mb-2">Respond to this Quotation:</h6>
+              
+              <!-- Accept Form -->
+              <form action="{% url 'quotation_respond' order.request_id %}" method="POST" class="d-inline">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="accept">
+                <button type="submit" class="btn btn-gold w-100 py-2 mb-2 fw-bold" onclick="return confirm('Accept this quotation and authorize production?');">
+                  <i class="bi bi-check-circle-fill me-1"></i> Accept Quotation & Begin Production
+                </button>
+              </form>
+
+              <!-- Revision Button triggers collapse -->
+              <button class="btn btn-outline-secondary w-100 py-2 btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#revisionCollapse">
+                <i class="bi bi-arrow-repeat me-1"></i> Request Revision / Price Adjustment
+              </button>
+
+              <div class="collapse mt-3" id="revisionCollapse">
+                <form action="{% url 'quotation_respond' order.request_id %}" method="POST" class="p-3 bg-light rounded border">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="revision">
+                  <label class="form-label small fw-bold">Feedback / Requested Changes:</label>
+                  <textarea name="feedback" rows="3" class="form-control mb-2" required placeholder="Specify any weight adjustment, budget limitation, or design tweaks..."></textarea>
+                  <button type="submit" class="btn btn-dark-luxury btn-sm">Submit Revision Request</button>
+                </form>
+              </div>
+            </div>
+          {% endif %}
+
+        </div>
+      {% else %}
+        <div class="card p-5 border-gold-subtle shadow-sm bg-white rounded-3 text-center mb-4">
+          <i class="bi bi-clock-history fs-1 text-gold mb-3"></i>
+          <h4 class="serif-font fw-bold">Quotation Under Preparation</h4>
+          <p class="text-muted small">
+            Our master jewellery designer and gemmologist are currently evaluating your reference photos and estimating pure metal weights. Your detailed quotation with CAD blueprint will appear here shortly.
+          </p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- RIGHT: Request Details & Attached Photos -->
+    <div class="col-lg-6">
+      
+      <!-- Specifications Card -->
+      <div class="card p-4 border-gold-subtle shadow-sm bg-white rounded-3 mb-4">
+        <h5 class="serif-font fw-bold mb-3 border-bottom pb-2">Client Specifications</h5>
+        
+        <table class="table-luxury-specs border rounded mb-3">
+          <tr>
+            <td>Jewellery Type:</td>
+            <td class="fw-bold">{{ order.get_jewellery_type_display }}</td>
+          </tr>
+          <tr>
+            <td>Precious Metal:</td>
+            <td>{{ order.get_metal_type_display }} ({{ order.gold_purity }})</td>
+          </tr>
+          <tr>
+            <td>Target Weight:</td>
+            <td><strong>{{ order.expected_weight }}</strong> Grams</td>
+          </tr>
+          <tr>
+            <td>Customer Budget:</td>
+            <td>₹{{ order.preferred_budget }}</td>
+          </tr>
+          {% if order.ring_size %}
+            <tr>
+              <td>Ring Size:</td>
+              <td>{{ order.ring_size }}</td>
+            </tr>
+          {% endif %}
+          {% if order.necklace_length %}
+            <tr>
+              <td>Length:</td>
+              <td>{{ order.necklace_length }}</td>
+            </tr>
+          {% endif %}
+        </table>
+
+        <div class="mb-3">
+          <h6 class="small fw-bold text-uppercase text-muted">Design Vision:</h6>
+          <p class="small text-dark bg-light p-3 rounded border">{{ order.design_description }}</p>
+        </div>
+
+        {% if order.special_instructions %}
+          <div>
+            <h6 class="small fw-bold text-uppercase text-muted">Special Instructions & Engravings:</h6>
+            <p class="small text-dark bg-light p-3 rounded border">{{ order.special_instructions }}</p>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Reference Images Attached -->
+      <div class="card p-4 border-gold-subtle shadow-sm bg-white rounded-3">
+        <h5 class="serif-font fw-bold mb-3 border-bottom pb-2">Attached Inspiration & Sketches ({{ images.count }})</h5>
+        
+        {% if images %}
+          <div class="row row-cols-3 g-2">
+            {% for img in images %}
+              <div class="col">
+                <a href="{{ img.image.url }}" target="_blank">
+                  <img src="{{ img.image.url }}" alt="Ref" class="img-fluid rounded border shadow-sm" style="height: 110px; width: 100%; object-fit: cover;">
+                </a>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-muted small mb-0">No reference images attached.</p>
+        {% endif %}
+      </div>
+
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+

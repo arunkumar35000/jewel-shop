@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}My Wishlist | AURA Luxury Jewellery{% endblock %}
+
+{% block content %}
+<div class="py-5 bg-white border-bottom">
+  <div class="container">
+    <span class="text-gold text-uppercase fw-bold small">Your Saved Heirlooms</span>
+    <h1 class="serif-font display-6 fw-bold mt-1">My Royal Wishlist</h1>
+    <p class="text-muted small mb-0">{{ wishlist_items.count }} jewellery pieces saved</p>
+  </div>
+</div>
+
+<div class="container py-5">
+  {% if wishlist_items %}
+    <div class="row g-4">
+      {% for item in wishlist_items %}
+        <div class="col-sm-6 col-md-4 col-lg-3">
+          <div class="product-card-luxury">
+            <div class="product-image-container">
+              <span class="badge-purity">{{ item.product.purity }}</span>
+              {% if item.product.primary_image %}
+                <img src="{{ item.product.primary_image.image.url }}" alt="{{ item.product.name }}">
+              {% endif %}
+            </div>
+            <div class="product-card-body">
+              <div class="product-category-sub">{{ item.product.category.name }}</div>
+              <h4 class="product-title">
+                <a href="{{ item.product.get_absolute_url }}">{{ item.product.name }}</a>
+              </h4>
+              <div class="product-weight-meta">
+                <span>Gross Wt: {{ item.product.gross_weight }}g</span>
+              </div>
+              <div class="product-price-row mb-3">
+                <span class="product-price-current">₹{{ item.product.final_price }}</span>
+                {% if item.product.discount_percent > 0 %}
+                  <span class="product-price-original">₹{{ item.product.base_price }}</span>
+                {% endif %}
+              </div>
+            </div>
+            <div class="product-card-footer border-top pt-3">
+              <div class="d-grid gap-2">
+                <a href="{% url 'wishlist_move_to_cart' item.product.id %}" class="btn btn-gold btn-sm py-2">
+                  <i class="bi bi-bag-plus me-1"></i> Move to Bag
+                </a>
+                <button class="btn btn-outline-danger btn-sm py-1" onclick="toggleWishlist({{ item.product.id }}, this); setTimeout(() => location.reload(), 400);">
+                  <i class="bi bi-trash me-1"></i> Remove
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="text-center py-5 my-5">
+      <div class="fs-1 text-gold mb-3"><i class="bi bi-heart"></i></div>
+      <h3 class="serif-font fw-bold">Your Wishlist is Empty</h3>
+      <p class="text-muted small">Save your favorite necklaces, diamond rings, and temple jewellery to view anytime.</p>
+      <a href="{% url 'product_list' %}" class="btn btn-gold mt-2">Explore Jewellery Collections</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+

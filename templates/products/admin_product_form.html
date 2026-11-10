@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} | AURA Admin{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <span class="badge bg-gold text-dark text-uppercase fw-bold">Catalog Management</span>
+      <h2 class="serif-font fw-bold mt-1">{{ title }}</h2>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'admin_product_list' %}" class="btn btn-outline-dark">
+        <i class="bi bi-arrow-left me-1"></i> Back to Products
+      </a>
+      {% if product %}
+        <a href="{% url 'admin_360_upload' product.pk %}" class="btn btn-dark-luxury">
+          <i class="bi bi-arrow-repeat me-1 text-gold"></i> Manage 360° Frames
+        </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="row g-4">
+      
+      <!-- Basic Details -->
+      <div class="col-lg-8">
+        <div class="card p-4 border-gold-subtle shadow-sm bg-white mb-4">
+          <h5 class="serif-font fw-bold mb-3 border-bottom pb-2">Product Core Information</h5>
+          
+          <div class="row g-3">
+            <div class="col-md-8">
+              <label class="form-label small fw-bold">Product Title / Name *</label>
+              {{ form.name }}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small fw-bold">SKU / Product Code *</label>
+              {{ form.sku }}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">Category *</label>
+              {{ form.category }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">Subcategory</label>
+              {{ form.subcategory }}
+            </div>
+
+            <div class="col-12">
+              <label class="form-label small fw-bold">Description *</label>
+              {{ form.description }}
+            </div>
+
+            <div class="col-12">
+              <label class="form-label small fw-bold">Design Specifications & Lock Details</label>
+              {{ form.specifications }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Weights & Financial Pricing -->
+        <div class="card p-4 border-gold-subtle shadow-sm bg-white mb-4">
+          <h5 class="serif-font fw-bold mb-3 border-bottom pb-2">Weights & Financial Attributes</h5>
+          
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label small fw-bold">Metal Type *</label>
+              {{ form.metal_type }}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small fw-bold">Purity / Karat *</label>
+              {{ form.purity }}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small fw-bold">Gender</label>
+              {{ form.gender }}
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label small fw-bold">Gross Weight (grams) *</label>
+              {{ form.gross_weight }}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small fw-bold">Net Metal Weight (grams) *</label>
+              {{ form.net_weight }}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small fw-bold">Stone Weight (grams/carats)</label>
+              {{ form.stone_weight }}
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label small fw-bold">Base Retail Price (₹) *</label>
+              {{ form.base_price }}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small fw-bold">Making Charges (₹)</label>
+              {{ form.making_charges }}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small fw-bold">Discount Percentage (%)</label>
+              {{ form.discount_percent }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Inventory & Flags -->
+        <div class="card p-4 border-gold-subtle shadow-sm bg-white">
+          <h5 class="serif-font fw-bold mb-3 border-bottom pb-2">Inventory, Status & Badges</h5>
+          
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label small fw-bold">Available Stock (Units)</label>
+              {{ form.stock }}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small fw-bold">Availability Status</label>
+              {{ form.availability }}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small fw-bold">Publishing Status</label>
+              {{ form.status }}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">Certificate Number</label>
+              {{ form.certificate_number }}
+            </div>
+            <div class="col-md-6 d-flex align-items-center mt-4">
+              <div class="form-check">
+                {{ form.hallmark_certified }}
+                <label class="form-check-label small fw-bold" for="{{ form.hallmark_certified.id_for_label }}">BIS 916 Hallmark Certified</label>
+              </div>
+            </div>
+
+            <div class="col-12 border-top pt-3">
+              <div class="d-flex flex-wrap gap-4">
+                <div class="form-check">
+                  {{ form.is_featured }}
+                  <label class="form-check-label small" for="{{ form.is_featured.id_for_label }}">Featured on Homepage</label>
+                </div>
+                <div class="form-check">
+                  {{ form.is_trending }}
+                  <label class="form-check-label small" for="{{ form.is_trending.id_for_label }}">Trending Collection</label>
+                </div>
+                <div class="form-check">
+                  {{ form.is_new }}
+                  <label class="form-check-label small" for="{{ form.is_new.id_for_label }}">New Arrival</label>
+                </div>
+                <div class="form-check">
+                  {{ form.is_bestseller }}
+                  <label class="form-check-label small" for="{{ form.is_bestseller.id_for_label }}">Best Seller</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Media Uploads & Gallery -->
+      <div class="col-lg-4">
+        
+        {% if not product %}
+          <!-- Initial Creation Image Upload -->
+          <div class="card p-4 border-gold-subtle shadow-sm bg-white mb-4">
+            <h5 class="serif-font fw-bold mb-3 border-bottom pb-2">Initial Product Images</h5>
+            
+            <div class="mb-3">
+              <label class="form-label small fw-bold">Primary Gallery Image</label>
+              <input type="file" name="primary_image" class="form-control form-control-sm" accept="image/*">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-bold">Secondary Hover Image</label>
+              <input type="file" name="secondary_image" class="form-control form-control-sm" accept="image/*">
+            </div>
+          </div>
+        {% else %}
+          <!-- Existing Gallery Management -->
+          <div class="card p-4 border-gold-subtle shadow-sm bg-white mb-4">
+            <h5 class="serif-font fw-bold mb-3 border-bottom pb-2">Product Gallery ({{ gallery_images.count }})</h5>
+            
+            <div class="d-flex flex-wrap gap-2 mb-3">
+              {% for img in gallery_images %}
+                <div class="position-relative border rounded p-1" style="width: 70px; height: 70px;">
+                  <img src="{{ img.image.url }}" alt="Gallery" class="w-100 h-100 object-fit-cover rounded">
+                  {% if img.is_primary %}
+                    <span class="badge bg-gold text-dark position-absolute bottom-0 start-0 m-1" style="font-size: 0.55rem;">Main</span>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            </div>
+
+            <div class="border-top pt-3">
+              <label class="form-label small fw-bold">Add Additional Gallery Image</label>
+              <input type="file" name="new_gallery_image" class="form-control form-control-sm mb-2" accept="image/*">
+              <input type="text" name="new_image_alt" class="form-control form-control-sm" placeholder="Alt text / angle description">
+            </div>
+          </div>
+
+          <!-- 360 Degree Viewer Shortcut -->
+          <div class="card p-4 border-gold-subtle shadow-sm bg-dark-obsidian text-light mb-4">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <i class="bi bi-arrow-repeat text-gold fs-4"></i>
+              <h5 class="serif-font text-gold mb-0">360° Interactive Rotate</h5>
+            </div>
+            <p class="small text-muted mb-3">
+              Current sequence has <strong>{{ frames_360.count }}</strong> frames.
+            </p>
+            <a href="{% url 'admin_360_upload' product.pk %}" class="btn btn-gold btn-sm w-100">
+              Manage 360° Multi-Angle Frames
+            </a>
+          </div>
+        {% endif %}
+
+        <!-- Submit Button Card -->
+        <div class="card p-3 border-gold-subtle shadow-sm bg-white">
+          <button type="submit" class="btn btn-gold w-100 py-3 fw-bold">
+            <i class="bi bi-check-circle me-1"></i> Save Product Information
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  </form>
+</div>
+{% endblock %}
+

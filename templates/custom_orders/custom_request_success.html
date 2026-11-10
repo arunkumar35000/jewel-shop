@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Request Submitted | AURA Custom Design{% endblock %}
+
+{% block content %}
+<div class="container py-5 my-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-7 text-center">
+      <div class="card p-5 border-gold shadow-lg bg-white rounded-3">
+        <div class="fs-1 text-gold mb-3"><i class="bi bi-patch-check-fill"></i></div>
+        <h2 class="serif-font display-6 fw-bold mb-2">Custom Design Request Received!</h2>
+        <p class="text-muted">
+          Your unique request reference code is: <br>
+          <span class="fs-4 fw-bold font-monospace text-dark">{{ order.request_id }}</span>
+        </p>
+
+        <div class="p-4 bg-light rounded text-start my-4 border">
+          <div class="row g-2 small">
+            <div class="col-6"><strong>Client Name:</strong> {{ order.full_name }}</div>
+            <div class="col-6"><strong>Contact Phone:</strong> {{ order.phone }}</div>
+            <div class="col-6"><strong>Jewellery Type:</strong> {{ order.get_jewellery_type_display }}</div>
+            <div class="col-6"><strong>Metal & Purity:</strong> {{ order.get_metal_type_display }} ({{ order.gold_purity }})</div>
+            <div class="col-6"><strong>Expected Weight:</strong> {{ order.expected_weight }}g</div>
+            <div class="col-6"><strong>Target Budget:</strong> ₹{{ order.preferred_budget }}</div>
+            <div class="col-12 mt-2"><strong>Reference Images:</strong> {{ order.reference_images.count }} photo(s) securely attached.</div>
+          </div>
+        </div>
+
+        <p class="text-muted small">
+          Our master artisan and gemmological head are reviewing your reference photos. You will receive an official quotation with CAD render in your dashboard within 24 hours.
+        </p>
+
+        <div class="d-flex flex-wrap gap-3 justify-content-center mt-3">
+          <a href="{% url 'customer_custom_order_detail' order.request_id %}" class="btn btn-gold px-4 py-2">
+            <i class="bi bi-binoculars me-1"></i> Track Request Status
+          </a>
+          <a href="{% url 'home' %}" class="btn btn-outline-dark px-4 py-2">
+            Return to Homepage
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

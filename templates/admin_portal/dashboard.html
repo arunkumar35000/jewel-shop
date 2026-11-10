@@ -1,0 +1,283 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Executive Dashboard | AURA Admin Portal{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 px-lg-5">
+  
+  <!-- Header -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+    <div>
+      <span class="badge bg-gold text-dark text-uppercase fw-bold">Executive Suite</span>
+      <h2 class="serif-font fw-bold mt-1 mb-0">Atelier Administration & Analytics</h2>
+      <small class="text-muted">Real-time sales, order fulfillment, and custom design pipeline</small>
+    </div>
+    <div class="d-flex gap-2 mt-3 mt-md-0">
+      <a href="{% url 'admin_product_create' %}" class="btn btn-gold btn-sm">
+        <i class="bi bi-plus-lg me-1"></i> Add Product
+      </a>
+      <a href="{% url 'admin_orders_list' %}" class="btn btn-dark-luxury btn-sm">
+        <i class="bi bi-box-seam me-1"></i> View Orders
+      </a>
+      <a href="{% url 'admin_custom_requests_list' %}" class="btn btn-outline-dark btn-sm">
+        <i class="bi bi-gem me-1"></i> Custom Requests
+      </a>
+    </div>
+  </div>
+
+  <!-- KPI Metric Cards Grid -->
+  <div class="row g-3 mb-4">
+    
+    <!-- Total Revenue -->
+    <div class="col-sm-6 col-lg-3">
+      <div class="admin-kpi-card">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="small text-uppercase text-muted fw-bold">Total Sales Revenue</span>
+          <div class="kpi-icon-bubble"><i class="bi bi-currency-rupee"></i></div>
+        </div>
+        <h3 class="fw-bold mb-0">₹{{ total_sales }}</h3>
+        <small class="text-success"><i class="bi bi-arrow-up-right me-1"></i> All Paid Orders</small>
+      </div>
+    </div>
+
+    <!-- Total Orders & Pending -->
+    <div class="col-sm-6 col-lg-3">
+      <div class="admin-kpi-card">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="small text-uppercase text-muted fw-bold">Total Orders</span>
+          <div class="kpi-icon-bubble"><i class="bi bi-bag-check"></i></div>
+        </div>
+        <h3 class="fw-bold mb-0">{{ total_orders }}</h3>
+        <small class="text-warning fw-bold">{{ pending_orders }} Pending Confirmation</small>
+      </div>
+    </div>
+
+    <!-- Total Products -->
+    <div class="col-sm-6 col-lg-3">
+      <div class="admin-kpi-card">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="small text-uppercase text-muted fw-bold">Products in Catalog</span>
+          <div class="kpi-icon-bubble"><i class="bi bi-gem"></i></div>
+        </div>
+        <h3 class="fw-bold mb-0">{{ total_products }}</h3>
+        <small class="text-muted"><a href="{% url 'admin_product_list' %}" class="text-gold">Manage Inventory &raquo;</a></small>
+      </div>
+    </div>
+
+    <!-- Custom Design Requests -->
+    <div class="col-sm-6 col-lg-3">
+      <div class="admin-kpi-card">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="small text-uppercase text-muted fw-bold">Custom Design Requests</span>
+          <div class="kpi-icon-bubble"><i class="bi bi-palette2"></i></div>
+        </div>
+        <h3 class="fw-bold mb-0">{{ total_custom_requests }}</h3>
+        <small class="text-danger fw-bold">{{ pending_custom_requests }} Awaiting Review</small>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Charts & Analytics Row -->
+  <div class="row g-4 mb-4">
+    
+    <!-- Category Distribution Donut Chart -->
+    <div class="col-lg-6">
+      <div class="card p-4 border-gold-subtle shadow-sm bg-white rounded-3 h-100">
+        <h5 class="serif-font fw-bold mb-3 border-bottom pb-2">Inventory by Category Distribution</h5>
+        <div style="max-height: 280px; position: relative;">
+          <canvas id="categoryChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Operations Card -->
+    <div class="col-lg-6">
+      <div class="card p-4 border-gold-subtle shadow-sm bg-white rounded-3 h-100">
+        <h5 class="serif-font fw-bold mb-3 border-bottom pb-2">Atelier Quick Operations</h5>
+        
+        <div class="row g-3">
+          <div class="col-sm-6">
+            <a href="{% url 'admin_product_create' %}" class="btn btn-outline-dark w-100 py-3 text-start d-flex align-items-center gap-3">
+              <i class="bi bi-plus-circle-fill text-gold fs-3"></i>
+              <div>
+                <div class="fw-bold">New Product</div>
+                <small class="text-muted">Create piece & images</small>
+              </div>
+            </a>
+          </div>
+
+          <div class="col-sm-6">
+            <a href="{% url 'admin_category_list' %}" class="btn btn-outline-dark w-100 py-3 text-start d-flex align-items-center gap-3">
+              <i class="bi bi-tags-fill text-gold fs-3"></i>
+              <div>
+                <div class="fw-bold">Categories</div>
+                <small class="text-muted">Taxonomy & order</small>
+              </div>
+            </a>
+          </div>
+
+          <div class="col-sm-6">
+            <a href="{% url 'admin_orders_list' %}" class="btn btn-outline-dark w-100 py-3 text-start d-flex align-items-center gap-3">
+              <i class="bi bi-truck text-gold fs-3"></i>
+              <div>
+                <div class="fw-bold">Fulfillment</div>
+                <small class="text-muted">Update AWB & status</small>
+              </div>
+            </a>
+          </div>
+
+          <div class="col-sm-6">
+            <a href="{% url 'admin_customers_list' %}" class="btn btn-outline-dark w-100 py-3 text-start d-flex align-items-center gap-3">
+              <i class="bi bi-people-fill text-gold fs-3"></i>
+              <div>
+                <div class="fw-bold">Customer Directory</div>
+                <small class="text-muted">Patrons & loyalty</small>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <div class="mt-4 p-3 bg-light rounded border small">
+          <div class="fw-bold text-dark mb-1"><i class="bi bi-info-circle text-gold me-1"></i> Live Gold Pricing Ticker</div>
+          <div>Today: 24K: ₹{{ DAILY_GOLD_RATES.24K }}/g • 22K: ₹{{ DAILY_GOLD_RATES.22K }}/g • 18K: ₹{{ DAILY_GOLD_RATES.18K }}/g</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Recent Orders & Recent Custom Requests Tables Row -->
+  <div class="row g-4">
+    
+    <!-- Recent Orders Table -->
+    <div class="col-lg-7">
+      <div class="card border-gold-subtle shadow-sm bg-white rounded-3 overflow-hidden">
+        <div class="card-header bg-white border-bottom p-3 d-flex justify-content-between align-items-center">
+          <h5 class="serif-font fw-bold mb-0">Recent Jewellery Orders</h5>
+          <a href="{% url 'admin_orders_list' %}" class="small text-gold fw-bold">View All Orders &raquo;</a>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0 small">
+            <thead class="table-light text-uppercase">
+              <tr>
+                <th>Order #</th>
+                <th>Customer</th>
+                <th>Status</th>
+                <th>Amount</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for ord in recent_orders %}
+                <tr>
+                  <td class="fw-bold font-monospace">{{ ord.order_number }}</td>
+                  <td>
+                    <div>{{ ord.customer_name }}</div>
+                    <small class="text-muted">{{ ord.customer_phone }}</small>
+                  </td>
+                  <td>
+                    <span class="badge {% if ord.order_status == 'DELIVERED' %}bg-success{% elif ord.order_status == 'CANCELLED' %}bg-danger{% else %}bg-dark text-gold border border-gold{% endif %}">
+                      {{ ord.get_order_status_display }}
+                    </span>
+                  </td>
+                  <td class="fw-bold">₹{{ ord.grand_total }}</td>
+                  <td>
+                    <a href="{% url 'admin_order_detail' ord.order_number %}" class="btn btn-outline-dark btn-sm py-1 px-2">Manage</a>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="5" class="text-center py-4 text-muted">No orders placed yet.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Customization Requests -->
+    <div class="col-lg-5">
+      <div class="card border-gold-subtle shadow-sm bg-white rounded-3 overflow-hidden">
+        <div class="card-header bg-white border-bottom p-3 d-flex justify-content-between align-items-center">
+          <h5 class="serif-font fw-bold mb-0">Recent Custom Requests</h5>
+          <a href="{% url 'admin_custom_requests_list' %}" class="small text-gold fw-bold">All Requests &raquo;</a>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0 small">
+            <thead class="table-light text-uppercase">
+              <tr>
+                <th>Request ID</th>
+                <th>Type & Metal</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for req in recent_custom_requests %}
+                <tr>
+                  <td>
+                    <div class="fw-bold font-monospace">{{ req.request_id }}</div>
+                    <small class="text-muted">{{ req.full_name }}</small>
+                  </td>
+                  <td>{{ req.get_jewellery_type_display }} ({{ req.gold_purity }})</td>
+                  <td>
+                    <span class="badge {% if req.status == 'QUOTATION_SENT' %}bg-warning text-dark{% elif req.status == 'APPROVED' %}bg-success{% else %}bg-secondary{% endif %}">
+                      {{ req.get_status_display }}
+                    </span>
+                  </td>
+                  <td>
+                    <a href="{% url 'admin_custom_request_detail' req.request_id %}" class="btn btn-outline-gold btn-sm py-1 px-2">Review</a>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="4" class="text-center py-4 text-muted">No custom requests yet.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('categoryChart');
+    if (ctx) {
+      new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: {{ cat_labels|safe }},
+          datasets: [{
+            data: {{ cat_data|safe }},
+            backgroundColor: [
+              '#D4AF37', '#111111', '#B8860B', '#F5E6BA', '#8A6D3B', '#333333'
+            ],
+            borderColor: '#FFFFFF',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+            }
+          }
+        }
+      });
+    }
+  });
+</script>
+{% endblock %}
+
