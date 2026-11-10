@@ -20,7 +20,7 @@ class ProductDetailAPI(generics.RetrieveAPIView):
 
 class Product360FramesAPI(APIView):
     """
-    Returns the ordered list of 360 rotation frames for a given product slug.
+    Returns the ordered list of 360 rotations frames for a given product slug.
     """
     def get(self, request, slug):
         product = Product.objects.filter(slug=slug).first()
