@@ -137,6 +137,7 @@ Jewellery_Shop/
 │
 ├── backend_api/                  # [3] BACKEND API: REST API for Website & Admin
 │   ├── apps.py                   # BackendApiConfig
+│   ├── payment.py                # Stripe Gateway Engine, Checkout Sessions & Webhooks
 │   ├── serializers.py            # DRF serializers (Products, Cart, Orders, Admin KPIs)
 │   ├── urls.py                   # API v1 routes (/api/v1/...)
 │   └── views.py                  # Public & Admin communication endpoints
@@ -146,6 +147,10 @@ Jewellery_Shop/
 ├── products/                     # Domain App: Categories, Products, 360° Image Frames
 ├── cart/                         # Domain App: Cart, CartItems, GST & Pricing Engine
 ├── orders/                       # Domain App: Orders, OrderItems, Payments, Invoicing
+│   ├── models.py                 # Order, OrderItem, and Payment Transaction model
+│   ├── payment.py                # Order payment routing & transaction recorder
+│   ├── urls.py                   # Order routes & /orders/payment/stripe/...
+│   └── views.py                  # Checkout logic & direct Stripe 302 redirect
 ├── custom_orders/                # Domain App: Custom Design Requests, Images, Quotations
 │
 ├── jewellery_shop/               # Project Root Configuration
@@ -158,6 +163,7 @@ Jewellery_Shop/
 ├── db.sqlite3                    # Default development database (pre-seeded)
 ├── manage.py                     # Django CLI management executable
 ├── requirements.txt              # Complete Python package requirements
+├── .env.example                  # Environment configuration template (Stripe keys guide)
 ├── run.bat                       # 1-Click Windows Batch server launcher
 ├── run.ps1                       # 1-Click PowerShell server launcher
 └── README.md                     # Comprehensive documentation for the team
@@ -220,15 +226,33 @@ python manage.py runserver 127.0.0.1:8000
 
 ### 3. Stripe Payment Gateway Configuration
 
-The project utilizes environment variables (`.env`) for Stripe API keys. The keys are automatically loaded by `settings.py` with fallback defaults for seamless local development:
+The project utilizes environment variables (`.env`) for Stripe API keys. The keys are automatically loaded by `settings.py` from `.env` for secure development and production deployment:
 
 ```env
 # Stripe Payment Gateway Credentials (.env)
-STRIPE_PUBLISHABLE_KEY=pk_test_your_publishable_key_here
+STRIPE_PUBLISHABLE_KEY=pk_test_51UaCqz5oxjJIyLmeyiVD2CevpNeIzx1VzKzX465IE7ISOItIB4vg7NMhv6aX3QUJiVgduqPH9Qnqv1ASAkZwTXqV00bmcC5pxv
 STRIPE_SECRET_KEY=sk_test_your_secret_key_here
 STRIPE_CURRENCY=inr
 STRIPE_WEBHOOK_SECRET=whsec_your_webhook_signing_secret_here
 ```
+
+#### 🛡️ Payment Security & Git Best Practices
+| Parameter | Value / Status | Git Status | Security Explanation |
+| :--- | :--- | :--- | :--- |
+| **STRIPE_PUBLISHABLE_KEY** | `pk_test_51UaCqz5oxjJIyLmeyiVD2CevpNeIzx1VzKzX465IE7ISOItIB4vg7NMhv6aX3QUJiVgduqPH9Qnqv1ASAkZwTXqV00bmcC5pxv` | ✅ Tracked in Git & Docs | Public client key, safe to expose in templates and Git. |
+| **STRIPE_SECRET_KEY** | `sk_test_...` *(Configured in local `.env`)* | 🔒 Excluded (`.gitignore`) | **GitHub Push Protection** blocks any commits containing live secret keys to prevent unauthorized account access. Stored safely in local `.env`. |
+| **STRIPE_CURRENCY** | `inr` (Indian Rupee ₹) | ✅ Tracked | Default currency for all checkout transactions. |
+| **STRIPE_WEBHOOK_SECRET** | `whsec_...` | 🔒 Excluded (`.gitignore`) | Webhook signature verification secret from Stripe dashboard. |
+
+#### 📂 Payment Engine File Locations in Git
+- ⚡ **Payment Gateway Engine**: [`backend_api/payment.py`](backend_api/payment.py) (Session creator, Webhooks listener, Transaction REST APIs)
+- 🛒 **Order Checkout Engine**: [`orders/views.py`](orders/views.py) (Direct Stripe 302 redirect on checkout form submit)
+- 🤝 **Payment Utilities & Sync**: [`orders/payment.py`](orders/payment.py) (Transaction recorder & DB status synchronization)
+- 🗄️ **Payment Database Model**: [`orders/models.py`](orders/models.py) (`Payment` model with `transaction_id`, `amount`, `status`, `payment_details`)
+- 👑 **Admin Gateway Ledger UI**: [`admin_panel/templates/admin_panel/transactions_list.html`](admin_panel/templates/admin_panel/transactions_list.html) (`/admin-panel/transactions/`)
+- 📊 **Admin Executive KPIs**: [`admin_panel/templates/admin_panel/dashboard.html`](admin_panel/templates/admin_panel/dashboard.html) (Live Payment Transactions table)
+- 💳 **Storefront Checkout Template**: [`frontend/templates/orders/checkout.html`](frontend/templates/orders/checkout.html) (Stripe option #1 with dynamic button)
+- 🧪 **Offline Fallback Page**: [`frontend/templates/orders/stripe_mock_checkout.html`](frontend/templates/orders/stripe_mock_checkout.html)
 
 ---
 
