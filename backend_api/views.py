@@ -2,6 +2,7 @@ from decimal import Decimal
 from django.shortcuts import get_object_or_404
 from django.db.models import Sum, Count, Q
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login, logout
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import generics, status, permissions
@@ -161,6 +162,131 @@ class CartItemAddAPI(APIView):
             'message': f"Added '{product.name}' to shopping bag",
             'total_items': cart.total_items,
             'grand_total': str(cart.grand_total)
+        }, status=status.HTTP_200_OK)
+
+
+class CartItemUpdateAPI(APIView):
+    """
+    Updates the quantity of an existing item in the shopping cart.
+    Accepts item_id in URL, and {"quantity": 2} or {"action": "increase"|"decrease"}.
+    """
+    def post(self, request, item_id):
+        cart = _get_cart(request)
+        item = get_object_or_404(CartItem, id=item_id, cart=cart)
+        action = request.data.get('action')
+        quantity = request.data.get('quantity')
+
+        if action == 'increase':
+            item.quantity += 1
+            item.save()
+        elif action == 'decrease':
+            if item.quantity > 1:
+                item.quantity -= 1
+                item.save()
+            else:
+                item.delete()
+        elif quantity is not None:
+            try:
+                qty = int(quantity)
+                if qty > 0:
+                    item.quantity = qty
+                    item.save()
+                else:
+                    item.delete()
+            except (ValueError, TypeError):
+                return Response({'error': 'Invalid quantity'}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({
+            'success': True,
+            'message': 'Shopping bag updated successfully',
+            'total_items': cart.total_items,
+            'grand_total': str(cart.grand_total)
+        }, status=status.HTTP_200_OK)
+
+
+class CartItemRemoveAPI(APIView):
+    """
+    Removes an item from the shopping bag by item_id.
+    """
+    def post(self, request, item_id):
+        cart = _get_cart(request)
+        item = get_object_or_404(CartItem, id=item_id, cart=cart)
+        name = item.product.name
+        item.delete()
+        return Response({
+            'success': True,
+            'message': f"Removed '{name}' from shopping bag",
+            'total_items': cart.total_items,
+            'grand_total': str(cart.grand_total)
+        }, status=status.HTTP_200_OK)
+
+    def delete(self, request, item_id):
+        return self.post(request, item_id)
+
+
+# =====================================================================
+# USER AUTHENTICATION & SESSION APIS
+# =====================================================================
+
+class AuthLoginAPI(APIView):
+    """
+    Authenticates user and initiates an active Django session.
+    Accepts {"username": "...", "password": "..."}.
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        if not username or not password:
+            return Response({'error': 'Both username and password are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            if not user.is_active:
+                return Response({'error': 'Account is inactive.'}, status=status.HTTP_403_FORBIDDEN)
+            login(request, user)
+            if not request.session.session_key:
+                request.session.save()
+            return Response({
+                'success': True,
+                'message': f"Welcome, {user.username}!",
+                'user': {
+                    'id': user.id,
+                    'username': user.username,
+                    'email': user.email,
+                    'is_staff': user.is_staff,
+                    'is_superuser': user.is_superuser
+                },
+                'session_key': request.session.session_key
+            }, status=status.HTTP_200_OK)
+        return Response({'error': 'Invalid username or password.'}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+class AuthLogoutAPI(APIView):
+    """
+    Terminates the user's active session.
+    """
+    def post(self, request):
+        logout(request)
+        return Response({'success': True, 'message': 'Successfully logged out.'}, status=status.HTTP_200_OK)
+
+
+class AuthUserAPI(APIView):
+    """
+    Returns current authenticated user details.
+    """
+    def get(self, request):
+        if not request.user.is_authenticated:
+            return Response({'authenticated': False, 'user': None}, status=status.HTTP_200_OK)
+        return Response({
+            'authenticated': True,
+            'user': {
+                'id': request.user.id,
+                'username': request.user.username,
+                'email': request.user.email,
+                'is_staff': request.user.is_staff
+            }
         }, status=status.HTTP_200_OK)
 
 

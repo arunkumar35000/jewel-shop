@@ -1,0 +1,841 @@
+{
+  "info": {
+    "name": "AURA Gold Jewellery E-Commerce API Suite",
+    "description": "Commercial-grade API test collection for AURA Jewellery with Authentication, Cart Operations, Stripe Gateway, and Automated pm.test assertions.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. User Authentication APIs",
+      "item": [
+        {
+          "name": "Admin Login (Start Session)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"User is staff admin\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "    pm.expect(jsonData.user.is_staff).to.eql(true);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{admin_username}}\",\n  \"password\": \"{{admin_password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "login", ""]
+            }
+          }
+        },
+        {
+          "name": "Customer Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Login successful\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{customer_username}}\",\n  \"password\": \"{{customer_password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "login", ""]
+            }
+          }
+        },
+        {
+          "name": "Current Authenticated User Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/user/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "user", ""]
+            }
+          }
+        },
+        {
+          "name": "Logout Session",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/logout/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "logout", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Public Website & Catalog APIs",
+      "item": [
+        {
+          "name": "List All Categories",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response is array with categories\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(Array.isArray(jsonData)).to.eql(true);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/categories/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "categories", ""]
+            }
+          }
+        },
+        {
+          "name": "Product Catalog (Filterable)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/products/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "products", ""]
+            }
+          }
+        },
+        {
+          "name": "Filter Products (Gold, 22K)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/products/?metal=GOLD&purity=22K&sort=price_low",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "products", ""],
+              "query": [
+                { "key": "metal", "value": "GOLD" },
+                { "key": "purity", "value": "22K" },
+                { "key": "sort", "value": "price_low" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Single Product Details",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Has product name and price\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('name');",
+                  "    pm.expect(jsonData).to.have.property('calculated_price');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/products/{{sample_product_slug}}/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "products", "{{sample_product_slug}}", ""]
+            }
+          }
+        },
+        {
+          "name": "Product 360 Frames (24 Angles)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/products/{{sample_product_slug}}/360-frames/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "products", "{{sample_product_slug}}", "360-frames", ""]
+            }
+          }
+        },
+        {
+          "name": "Order Tracking by Number",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Has order status and number\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('order_status');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/orders/track/{{sample_order_number}}/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "orders", "track", "{{sample_order_number}}", ""]
+            }
+          }
+        },
+        {
+          "name": "List Custom Design Requests",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/custom-orders/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "custom-orders", ""]
+            }
+          }
+        },
+        {
+          "name": "Create Custom Design Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Has request_id\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('request_id');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customer_name\": \"Arun Kumar\",\n  \"customer_email\": \"arunkumarm021101@gmail.com\",\n  \"customer_phone\": \"+91 9876543210\",\n  \"jewellery_type\": \"NECKLACE\",\n  \"preferred_metal\": \"22K_GOLD\",\n  \"estimated_weight_grams\": 45.5,\n  \"budget_min\": 250000,\n  \"budget_max\": 350000,\n  \"special_instructions\": \"Temple craftsmanship with ruby accents and matching earrings.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/custom-orders/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "custom-orders", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Shopping Cart APIs",
+      "item": [
+        {
+          "name": "Get Cart & GST Breakdown",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Has subtotal and grand_total\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('grand_total');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/cart/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "cart", ""]
+            }
+          }
+        },
+        {
+          "name": "Add Product to Cart",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Cart updated successfully\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product_id\": {{sample_product_id}},\n  \"quantity\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/cart/add/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "cart", "add", ""]
+            }
+          }
+        },
+        {
+          "name": "Update Cart Item Quantity",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 or 404\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 404]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"increase\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/cart/update/{{sample_cart_item_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "cart", "update", "{{sample_cart_item_id}}", ""]
+            }
+          }
+        },
+        {
+          "name": "Remove Item from Cart",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 or 404\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 404]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/cart/remove/{{sample_cart_item_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "cart", "remove", "{{sample_cart_item_id}}", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Stripe Payment Gateway APIs",
+      "item": [
+        {
+          "name": "Create Stripe Checkout Session",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Has checkout URL\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('checkout_url');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"order_number\": \"{{sample_order_number}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/payment/stripe/create-checkout-session/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "payment", "stripe", "create-checkout-session", ""]
+            }
+          }
+        },
+        {
+          "name": "Stripe Payment Success Callback",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 or 302\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 302]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/payment/stripe/success/?session_id=cs_test_sample",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "payment", "stripe", "success", ""],
+              "query": [
+                { "key": "session_id", "value": "cs_test_sample" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Stripe Payment Cancel Callback",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 or 302\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 302]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/payment/stripe/cancel/?session_id=cs_test_sample",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "payment", "stripe", "cancel", ""],
+              "query": [
+                { "key": "session_id", "value": "cs_test_sample" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Stripe Webhook Listener",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 or 400\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 400]);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"evt_test_webhook_001\",\n  \"type\": \"checkout.session.completed\",\n  \"data\": {\n    \"object\": {\n      \"id\": \"cs_test_sample\",\n      \"payment_status\": \"paid\",\n      \"amount_total\": 16999900,\n      \"currency\": \"inr\",\n      \"metadata\": {\n        \"order_number\": \"{{sample_order_number}}\"\n      }\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/payment/stripe/webhook/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "payment", "stripe", "webhook", ""]
+            }
+          }
+        },
+        {
+          "name": "Payment Transactions Ledger (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                { "key": "username", "value": "{{admin_username}}", "type": "string" },
+                { "key": "password", "value": "{{admin_password}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/payment/transactions/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "payment", "transactions", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Admin Suite APIs",
+      "item": [
+        {
+          "name": "Admin Dashboard Stats (Live KPIs)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Has KPIs and Charts\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('kpis');",
+                  "    pm.expect(jsonData).to.have.property('charts');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                { "key": "username", "value": "{{admin_username}}", "type": "string" },
+                { "key": "password", "value": "{{admin_password}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/dashboard-stats/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "dashboard-stats", ""]
+            }
+          }
+        },
+        {
+          "name": "Admin Orders List",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                { "key": "username", "value": "{{admin_username}}", "type": "string" },
+                { "key": "password", "value": "{{admin_password}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/orders/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "orders", ""]
+            }
+          }
+        },
+        {
+          "name": "Admin Update Order Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Order updated successfully\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                { "key": "username", "value": "{{admin_username}}", "type": "string" },
+                { "key": "password", "value": "{{admin_password}}", "type": "string" }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"order_status\": \"SHIPPED\",\n  \"courier_partner\": \"BlueDart Apex Gold Logistics\",\n  \"tracking_number\": \"BLUEDART-IND-8829104\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/orders/{{sample_order_number}}/status/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "orders", "{{sample_order_number}}", "status", ""]
+            }
+          }
+        },
+        {
+          "name": "Admin Customers Directory",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                { "key": "username", "value": "{{admin_username}}", "type": "string" },
+                { "key": "password", "value": "{{admin_password}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/customers/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "admin", "customers", ""]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

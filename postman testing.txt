@@ -1,0 +1,466 @@
+================================================================================
+👑 AURA GOLD JEWELLERY E-COMMERCE - POSTMAN API & ROUTE TESTING DIRECTORY
+================================================================================
+
+💻 LOCAL MACHINE ENVIRONMENT:
+   • Your Local Machine Wi-Fi IPv4 : 172.21.239.226
+   • Development Port              : 8000
+   • Local IP Base URL             : http://172.21.239.226:8000
+   • Localhost Fallback Base URL   : http://127.0.0.1:8000
+
+⚡ HOW TO START DJANGO TO LISTEN ON YOUR LOCAL IP:
+   Open PowerShell and execute:
+   .\venv\Scripts\Activate.ps1
+   python manage.py runserver 0.0.0.0:8000
+
+🔐 DEFAULT SEED CREDENTIALS FOR TESTING:
+   • Administrator : admin    / Admin@123   (Access to /admin-panel/ and Django Admin)
+   • Customer      : customer / Customer@123 (Access to Storefront, Bag, Checkout)
+
+================================================================================
+TABLE OF CONTENTS:
+1. BACKEND REST APIS (/api/v1/...) [JSON Payload Ready for Postman]
+   1.1 Public Website & Product APIs
+   1.2 Shopping Cart APIs
+   1.3 Stripe Payment Gateway & Webhook APIs
+   1.4 Admin Suite Communication APIs
+2. ADMIN PANEL MANAGEMENT ROUTES (/admin-panel/...) [Web UI]
+3. STOREFRONT CUSTOMER WEBSITE ROUTES [Web UI]
+================================================================================
+
+
+================================================================================
+1. BACKEND REST APIS (/api/v1/...) [DIRECT POSTMAN TEST SUITE]
+================================================================================
+
+--------------------------------------------------------------------------------
+1.0 USER AUTHENTICATION & SESSION APIS
+--------------------------------------------------------------------------------
+
+[API-AUTH-01] Admin & Customer Login (Establishes Session)
+Method  : POST
+URL     : http://172.21.239.226:8000/api/v1/auth/login/
+Headers : Content-Type: application/json
+          Accept: application/json
+Body (raw JSON):
+{
+  "username": "admin",
+  "password": "Admin@123"
+}
+Expected: 200 OK (Returns session_key and user profile with is_staff: true)
+
+[API-AUTH-02] Current Authenticated User Profile
+Method  : GET
+URL     : http://172.21.239.226:8000/api/v1/auth/user/
+Headers : Accept: application/json
+Expected: 200 OK (Returns user profile details if authenticated)
+
+[API-AUTH-03] User Logout
+Method  : POST
+URL     : http://172.21.239.226:8000/api/v1/auth/logout/
+Headers : Accept: application/json
+Expected: 200 OK (Terminates the active session)
+
+
+--------------------------------------------------------------------------------
+1.1 PUBLIC WEBSITE & PRODUCT APIS
+--------------------------------------------------------------------------------
+
+[API-01] List All Categories
+Method  : GET
+URL     : http://172.21.239.226:8000/api/v1/categories/
+Headers : Accept: application/json
+Expected: 200 OK (Array of active categories with image and product count)
+
+[API-02] Filterable Product Catalog
+Method  : GET
+URL     : http://172.21.239.226:8000/api/v1/products/
+Headers : Accept: application/json
+Expected: 200 OK (Paginated list of active jewellery products with price breakdown)
+
+[API-03] Filter Products by Metal, Purity & Sorting
+Method  : GET
+URL     : http://172.21.239.226:8000/api/v1/products/?metal=GOLD&purity=22K&sort=price_low
+Headers : Accept: application/json
+Expected: 200 OK (Filtered product list matching query parameters)
+
+[API-04] Single Product Details
+Method  : GET
+URL     : http://172.21.239.226:8000/api/v1/products/celestial-starburst-18k-diamond-solitaire-pendant/
+Headers : Accept: application/json
+Expected: 200 OK (Product specifications, weight, making charges, image gallery)
+
+[API-05] 360° Interactive Angle Frames
+Method  : GET
+URL     : http://172.21.239.226:8000/api/v1/products/celestial-starburst-18k-diamond-solitaire-pendant/360-frames/
+Headers : Accept: application/json
+Expected: 200 OK (Array of 24 multi-angle frame URLs: 0° to 345°)
+
+[API-06] Order Tracking API
+Method  : GET
+URL     : http://172.21.239.226:8000/api/v1/orders/track/GJ-20261110-B4D252/
+Headers : Accept: application/json
+Expected: 200 OK (Order milestone progress, courier, tracking code)
+
+[API-07] List Custom Design Requests
+Method  : GET
+URL     : http://172.21.239.226:8000/api/v1/custom-orders/
+Headers : Accept: application/json
+Expected: 200 OK (List of bespoke jewellery design requests)
+
+[API-08] Submit New Custom Design Request
+Method  : POST
+URL     : http://172.21.239.226:8000/api/v1/custom-orders/
+Headers : Content-Type: application/json
+          Accept: application/json
+Body (raw JSON):
+{
+  "customer_name": "Arun Kumar",
+  "customer_email": "arunkumarm021101@gmail.com",
+  "customer_phone": "+91 9876543210",
+  "jewellery_type": "NECKLACE",
+  "preferred_metal": "22K_GOLD",
+  "estimated_weight_grams": 45.5,
+  "budget_min": 250000,
+  "budget_max": 350000,
+  "special_instructions": "Temple craftsmanship with ruby accents and matching earrings."
+}
+Expected: 201 Created (Returns generated request_id and initial PENDING status)
+
+
+--------------------------------------------------------------------------------
+1.2 SHOPPING CART APIS
+--------------------------------------------------------------------------------
+
+[API-09] View Shopping Bag & Tax Calculation
+Method  : GET
+URL     : http://172.21.239.226:8000/api/v1/cart/
+Headers : Accept: application/json
+Expected: 200 OK (Cart items, pure metal value, making charges, 3% GST, final total)
+
+[API-10] Add Jewellery to Bag
+Method  : POST
+URL     : http://172.21.239.226:8000/api/v1/cart/add/
+Headers : Content-Type: application/json
+          Accept: application/json
+Body (raw JSON):
+{
+  "product_id": 8,
+  "quantity": 1
+}
+Expected: 200 OK (Returns updated cart item count and new subtotal)
+
+[API-10B] Update Cart Item Quantity
+Method  : POST
+URL     : http://172.21.239.226:8000/api/v1/cart/update/1/
+Headers : Content-Type: application/json
+          Accept: application/json
+Body (raw JSON):
+{
+  "action": "increase"
+}
+Expected: 200 OK (Updates item quantity, returns updated bag total)
+
+[API-10C] Remove Item from Bag
+Method  : POST / DELETE
+URL     : http://172.21.239.226:8000/api/v1/cart/remove/1/
+Headers : Accept: application/json
+Expected: 200 OK (Removes item, returns remaining items and new subtotal)
+
+
+--------------------------------------------------------------------------------
+1.3 STRIPE PAYMENT GATEWAY & WEBHOOK APIS
+--------------------------------------------------------------------------------
+
+[API-11] Create Stripe Hosted Checkout Session
+Method  : POST
+URL     : http://172.21.239.226:8000/api/v1/payment/stripe/create-checkout-session/
+Headers : Content-Type: application/json
+          Accept: application/json
+Body (raw JSON):
+{
+  "order_number": "GJ-20261110-B4D252"
+}
+Expected: 200 OK
+Response:
+{
+  "status": "success",
+  "checkout_url": "https://checkout.stripe.com/c/pay/cs_test_...",
+  "session_id": "cs_test_...",
+  "order_number": "GJ-20261110-B4D252",
+  "amount": 169999.00,
+  "currency": "inr"
+}
+
+[API-12] Stripe Payment Success Callback (Session Verification)
+Method  : GET
+URL     : http://172.21.239.226:8000/api/v1/payment/stripe/success/?session_id=cs_test_sample
+Headers : Accept: application/json
+Expected: 200 OK or 302 Redirect to Order Confirmation page
+
+[API-13] Stripe Payment Cancellation Callback
+Method  : GET
+URL     : http://172.21.239.226:8000/api/v1/payment/stripe/cancel/?session_id=cs_test_sample
+Headers : Accept: application/json
+Expected: 200 OK (Records cancelled transaction attempt and redirects to checkout)
+
+[API-14] Stripe Webhook Event Listener
+Method  : POST
+URL     : http://172.21.239.226:8000/api/v1/payment/stripe/webhook/
+Headers : Content-Type: application/json
+          Stripe-Signature: t=1612345678,v1=abcdef...
+Body (raw JSON):
+{
+  "id": "evt_test_webhook_001",
+  "type": "checkout.session.completed",
+  "data": {
+    "object": {
+      "id": "cs_test_sample",
+      "payment_status": "paid",
+      "amount_total": 16999900,
+      "currency": "inr",
+      "metadata": {
+        "order_number": "GJ-20261110-B4D252"
+      }
+    }
+  }
+}
+Expected: 200 OK (Idempotently reconciles Payment record and marks order PAID)
+
+[API-15] Payment Transactions Ledger API (Admin API)
+Method  : GET
+URL     : http://172.21.239.226:8000/api/v1/payment/transactions/
+Headers : Accept: application/json
+Expected: 200 OK (List of all payment transactions, Stripe txn IDs, card brands, timestamps)
+
+
+--------------------------------------------------------------------------------
+1.4 ADMIN SUITE COMMUNICATION APIS
+--------------------------------------------------------------------------------
+
+[API-16] Executive Dashboard Live Statistics & Chart.js Dataset
+Method  : GET
+URL     : http://172.21.239.226:8000/api/v1/admin/dashboard-stats/
+Headers : Accept: application/json
+Expected: 200 OK
+Response:
+{
+  "total_revenue": 2185000.00,
+  "total_orders": 24,
+  "pending_orders": 3,
+  "custom_requests_pending": 2,
+  "sales_chart": {
+    "labels": ["May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov"],
+    "data": [120000, 180000, 240000, 310000, 290000, 480000, 565000]
+  }
+}
+
+[API-17] Admin Orders List
+Method  : GET
+URL     : http://172.21.239.226:8000/api/v1/admin/orders/
+Headers : Accept: application/json
+Expected: 200 OK (All orders with customer details, item counts, payment state)
+
+[API-18] Admin Update Order Fulfillment Status
+Method  : PATCH
+URL     : http://172.21.239.226:8000/api/v1/admin/orders/GJ-20261110-B4D252/status/
+Headers : Content-Type: application/json
+          Accept: application/json
+Body (raw JSON):
+{
+  "order_status": "SHIPPED",
+  "courier_partner": "BlueDart Apex Gold Logistics",
+  "tracking_number": "BLUEDART-IND-8829104"
+}
+Expected: 200 OK (Returns updated order object and timestamp)
+
+[API-19] Admin Customers Directory & Lifetime Spend
+Method  : GET
+URL     : http://172.21.239.226:8000/api/v1/admin/customers/
+Headers : Accept: application/json
+Expected: 200 OK (Customer list with registration date, total orders, lifetime spent)
+
+
+================================================================================
+2. ADMIN PANEL MANAGEMENT ROUTES (/admin-panel/...) [BROWSER & POSTMAN]
+================================================================================
+
+[ADM-01] Executive KPI Analytics Dashboard
+Method : GET
+URL    : http://172.21.239.226:8000/admin-panel/dashboard/
+Desc   : Revenue overview, Chart.js sales trends, recent transactions & orders
+
+[ADM-02] Master Order Fulfillment List
+Method : GET
+URL    : http://172.21.239.226:8000/admin-panel/orders/
+Desc   : Search by order number, customer name, filter by status
+
+[ADM-03] Order Detail & Dispatch Operations
+Method : GET / POST
+URL    : http://172.21.239.226:8000/admin-panel/orders/GJ-20261110-B4D252/
+Desc   : Assign courier, enter tracking number, update lifecycle status
+
+[ADM-04] Payment Transactions & Stripe Gateway Ledger
+Method : GET
+URL    : http://172.21.239.226:8000/admin-panel/transactions/
+Desc   : Filterable ledger of Stripe payment IDs, card brands, amounts & statuses
+
+[ADM-05] Bespoke Custom Design Requests
+Method : GET
+URL    : http://172.21.239.226:8000/admin-panel/custom-requests/
+Desc   : Customer custom design submissions awaiting review
+
+[ADM-06] Custom Request Review & Sketches
+Method : GET
+URL    : http://172.21.239.226:8000/admin-panel/custom-requests/CUST-20261110-CC2F3/
+Desc   : Review client photos, reference sketches, gold purity & weight request
+
+[ADM-07] Issue Price Quotation & 3D CAD Render
+Method : GET / POST
+URL    : http://172.21.239.226:8000/admin-panel/custom-requests/CUST-20261110-CC2F3/quotation/
+Desc   : Calculate bullion metal value, making charge, GST, upload 3D CAD render
+
+[ADM-08] Customer Directory & Spend Analytics
+Method : GET
+URL    : http://172.21.239.226:8000/admin-panel/customers/
+Desc   : Customer records, registration dates, total orders and revenue
+
+[ADM-09] Customer Detailed Purchase Profile
+Method : GET / POST
+URL    : http://172.21.239.226:8000/admin-panel/customers/1/
+Desc   : Order history of customer, addresses, active status toggle
+
+[ADM-10] Product Inventory Management
+Method : GET
+URL    : http://172.21.239.226:8000/products/manage/products/
+Desc   : Stock monitoring, pricing breakdown, active status toggle
+
+[ADM-11] Create New Jewellery Product
+Method : GET / POST
+URL    : http://172.21.239.226:8000/products/manage/products/create/
+Desc   : Form to create item with metal purity (22K/18K/14K), weight, making charges
+
+[ADM-12] Upload 24 Multi-Angle 360° Sequence Frames
+Method : GET / POST
+URL    : http://172.21.239.226:8000/products/manage/products/8/360/
+Desc   : Upload 24 photo sequence for interactive 360-degree rotation engine
+
+[ADM-13] Native Django Superuser Administration
+Method : GET
+URL    : http://172.21.239.226:8000/admin/
+Desc   : Django built-in ORM administration portal
+
+
+================================================================================
+3. STOREFRONT CUSTOMER WEBSITE ROUTES [BROWSER & POSTMAN]
+================================================================================
+
+[WEB-01] Luxury Homepage
+Method : GET
+URL    : http://172.21.239.226:8000/
+Desc   : Hero slider, live gold price calculator, featured collections
+
+[WEB-02] Product Catalog
+Method : GET
+URL    : http://172.21.239.226:8000/products/
+Desc   : Filterable jewellery catalog by metal, purity, categories, and price
+
+[WEB-03] Category Filtered Catalog
+Method : GET
+URL    : http://172.21.239.226:8000/products/category/gold-jewellery/
+Desc   : View products strictly under Gold Jewellery
+
+[WEB-04] Product Detail Page (360° Viewer & Lens Zoom)
+Method : GET
+URL    : http://172.21.239.226:8000/products/detail/celestial-starburst-18k-diamond-solitaire-pendant/
+Desc   : High-definition product page with 360-degree rotation & optical hover zoom
+
+[WEB-05] Shopping Bag (Cart Detail)
+Method : GET
+URL    : http://172.21.239.226:8000/cart/
+Desc   : Customer bag with line items, 3% Indian GST, and net total
+
+[WEB-06] Add to Bag (HTML Form / POST)
+Method : POST
+URL    : http://172.21.239.226:8000/cart/add/
+Form Body: product_id=8&quantity=1
+
+[WEB-07] Update Bag Item Quantity
+Method : POST
+URL    : http://172.21.239.226:8000/cart/update/1/
+Form Body: action=increment (or action=decrement)
+
+[WEB-08] Remove Item from Bag
+Method : POST
+URL    : http://172.21.239.226:8000/cart/remove/1/
+
+[WEB-09] Slide-Out Quick Cart Drawer Snippet
+Method : GET
+URL    : http://172.21.239.226:8000/cart/quick-view/
+
+[WEB-10] Checkout & Payment Selection Page
+Method : GET / POST
+URL    : http://172.21.239.226:8000/checkout/
+Desc   : Multi-step checkout with Stripe option #1; POST automatically redirects (302) to Stripe
+
+[WEB-11] Order Confirmation Screen
+Method : GET
+URL    : http://172.21.239.226:8000/orders/confirmed/GJ-20261110-B4D252/
+Desc   : Post-payment receipt with delivery details
+
+[WEB-12] Order Milestone Tracking Screen
+Method : GET
+URL    : http://172.21.239.226:8000/orders/track/GJ-20261110-B4D252/
+Desc   : Visual progression bar (Placed -> Confirmed -> Shipped -> Delivered)
+
+[WEB-13] Tax Invoice (GST Compliant HSN 7113)
+Method : GET
+URL    : http://172.21.239.226:8000/orders/invoice/GJ-20261110-B4D252/
+Desc   : Printable luxury invoice with GSTIN (29AABCJ8492K1Z9) and authorized seal
+
+[WEB-14] Customer Order History
+Method : GET
+URL    : http://172.21.239.226:8000/orders/history/
+
+[WEB-15] Customer Bespoke Design Request Submission
+Method : GET / POST
+URL    : http://172.21.239.226:8000/custom-jewellery/
+Desc   : Customer uploads reference photos and enters gold specifications
+
+[WEB-16] Customer Custom Request Tracker
+Method : GET
+URL    : http://172.21.239.226:8000/custom-jewellery/my-requests/
+Desc   : View received price quotations and approve/reject designs
+
+[WEB-17] Customer & Admin Sign In
+Method : GET / POST
+URL    : http://172.21.239.226:8000/accounts/login/
+
+[WEB-18] Customer Registration
+Method : GET / POST
+URL    : http://172.21.239.226:8000/accounts/register/
+
+[WEB-19] Customer Profile & Security
+Method : GET
+URL    : http://172.21.239.226:8000/accounts/profile/
+
+[WEB-20] Customer Shipping & Billing Address Book
+Method : GET
+URL    : http://172.21.239.226:8000/accounts/addresses/
+
+[WEB-21] Customer Wishlist
+Method : GET
+URL    : http://172.21.239.226:8000/accounts/wishlist/
+
+[WEB-22] Brand Craftsmanship & Gold Transparency
+Method : GET
+URL    : http://172.21.239.226:8000/about/
+
+[WEB-23] Showroom Concierge Contact
+Method : GET / POST
+URL    : http://172.21.239.226:8000/contact/
+
+================================================================================
+END OF POSTMAN TESTING DIRECTORY
+================================================================================
+

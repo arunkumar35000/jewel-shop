@@ -12,8 +12,17 @@ urlpatterns = [
     path('products/<slug:slug>/360-frames/', views.Product360FramesAPI.as_view(), name='api_product_360_frames'),
     path('cart/', views.CartAPI.as_view(), name='api_cart'),
     path('cart/add/', views.CartItemAddAPI.as_view(), name='api_cart_add'),
+    path('cart/update/<int:item_id>/', views.CartItemUpdateAPI.as_view(), name='api_cart_update'),
+    path('cart/remove/<int:item_id>/', views.CartItemRemoveAPI.as_view(), name='api_cart_remove'),
     path('orders/track/<str:order_number>/', views.OrderTrackAPI.as_view(), name='api_order_track'),
     path('custom-orders/', views.CustomOrderListCreateAPI.as_view(), name='api_custom_orders'),
+
+    # -------------------------------------------------------------
+    # USER AUTHENTICATION REST APIS
+    # -------------------------------------------------------------
+    path('auth/login/', views.AuthLoginAPI.as_view(), name='api_auth_login'),
+    path('auth/logout/', views.AuthLogoutAPI.as_view(), name='api_auth_logout'),
+    path('auth/user/', views.AuthUserAPI.as_view(), name='api_auth_user'),
 
     # -------------------------------------------------------------
     # STRIPE PAYMENT & TRANSACTIONS REST APIS
